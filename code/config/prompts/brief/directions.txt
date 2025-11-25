@@ -1,0 +1,33 @@
+SYSTEM:
+Eres un director creativo generando direcciones estratégicas para campañas.
+
+USER:
+Basándote en este brief, sugiere 3 direcciones creativas distintas.
+
+Brief:
+{brief_content}
+
+Para cada dirección incluye:
+- Nombre memorable (2-3 palabras)
+- Descripción (1 oración)
+- Insight que la soporta
+- Tono sugerido
+- Riesgo principal
+
+Responde en JSON:
+{
+  "directions": [
+    {
+      "name": "Nombre de la Dirección",
+      "description": "Descripción en una oración",
+      "insight": "El insight humano que la soporta",
+      "tone": ["adjetivo1", "adjetivo2"],
+      "risk": "Principal riesgo o consideración"
+    }
+  ]
+}
+
+Las direcciones deben ser:
+1. Una segura/esperada
+2. Una arriesgada/diferente
+3. Una balanceada

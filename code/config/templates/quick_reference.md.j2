@@ -1,0 +1,89 @@
+# Quick Reference - {{ brand }}
+
+> **{{ challenge | default('[Escribir el desafío principal en una frase]') }}**
+
+---
+
+## El Desafío en 1 Frase
+
+> "{{ challenge_detail | default('[El challenge central de la campaña]') }}"
+
+---
+
+## Datos Clave del Mercado
+
+| Métrica | Valor |
+|---------|-------|
+| Tamaño de mercado | {{ market_size | default('[Valor]') }} |
+| Crecimiento | {{ market_growth | default('[%]') }} |
+| Market share {{ brand }} | {{ market_share | default('[%]') }} |
+| Principal competidor | {{ main_competitor | default('[Nombre]') }} |
+
+---
+
+## Target en 30 Segundos
+
+- **Quién**: {{ target_who | default('[Descripción corta]') }}
+- **Edad**: {{ target_age | default('[Rango]') }}
+- **Motivación**: {{ target_motivation | default('[Principal driver]') }}
+- **Barrera**: {{ target_barrier | default('[Principal obstáculo]') }}
+- **Medios**: {{ target_media | default('[Dónde están]') }}
+
+---
+
+## Insights Clave
+
+| Problema | Realidad | Oportunidad |
+|----------|----------|-------------|
+{% for insight in insights | default([{'problem': '[P1]', 'reality': '[R1]', 'opportunity': '[O1]'}, {'problem': '[P2]', 'reality': '[R2]', 'opportunity': '[O2]'}, {'problem': '[P3]', 'reality': '[R3]', 'opportunity': '[O3]'}]) %}
+| {{ insight.problem }} | {{ insight.reality }} | {{ insight.opportunity }} |
+{% endfor %}
+
+---
+
+## ❌ Qué NO Hacer
+
+{% for dont in donts | default(['[No hacer 1]', '[No hacer 2]', '[No hacer 3]', '[No hacer 4]', '[No hacer 5]']) %}
+{{ loop.index }}. ❌ {{ dont }}
+{% endfor %}
+
+---
+
+## ✅ Qué SÍ Hacer
+
+{% for do in dos | default(['[Sí hacer 1]', '[Sí hacer 2]', '[Sí hacer 3]', '[Sí hacer 4]', '[Sí hacer 5]']) %}
+{{ loop.index }}. ✅ {{ do }}
+{% endfor %}
+
+---
+
+## Direcciones Creativas
+
+{% for direction in directions | default([{'name': '[Nombre Dirección 1]', 'description': '[Una oración describiendo el approach]'}, {'name': '[Nombre Dirección 2]', 'description': '[Una oración describiendo el approach]'}, {'name': '[Nombre Dirección 3]', 'description': '[Una oración describiendo el approach]'}]) %}
+### {{ loop.index }}. "{{ direction.name }}"
+{{ direction.description }}
+
+{% endfor %}
+
+---
+
+## Preguntas para Brainstorming
+
+{% for question in questions | default(['¿Cómo podemos [objetivo] sin [restricción]?', '¿Qué pasa si [hipótesis contraria]?', '¿Cómo se vería esto en [contexto cultural]?', '¿Qué haría [competidor] y cómo lo hacemos diferente?', '¿Cómo lo contaría [persona del target]?']) %}
+{{ loop.index }}. {{ question }}
+{% endfor %}
+
+---
+
+## Checklist Pre-Ideación
+
+- [ ] Leí el brief original
+- [ ] Revisé la investigación de mercado
+- [ ] Entiendo al consumidor
+- [ ] Conozco la competencia
+- [ ] Tengo claros los KPIs
+- [ ] Sé qué NO debo hacer
+
+---
+
+**Última actualización**: {{ updated_at | default('Noviembre 2024') }}

@@ -1,0 +1,30 @@
+SYSTEM:
+Eres un evaluador experto de campañas publicitarias. Responde SOLO con JSON válido sin texto adicional.
+
+USER:
+Evalúa esta idea de campaña contra criterios de calidad.
+
+Idea:
+{idea_content}
+
+Evalúa en escala 1-10:
+1. ¿Tiene un concepto claro y único?
+2. ¿El insight es verdadero y relevante?
+3. ¿La ejecución es clara y visualizable?
+4. ¿Funciona para el formato requerido?
+5. ¿Está alineada con la marca?
+
+Responde SOLO con este JSON (sin texto adicional):
+{
+  "scores": {
+    "concept_clarity": 8,
+    "insight_strength": 7,
+    "execution_clarity": 9,
+    "format_fit": 8,
+    "brand_alignment": 7
+  },
+  "overall": 7.8,
+  "strengths": ["fortaleza 1", "fortaleza 2"],
+  "weaknesses": ["debilidad 1"],
+  "suggestions": ["sugerencia de mejora 1"]
+}

@@ -1,9 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(pandoc --version:*)",
-      "Bash(xcopy:*)",
-      "Bash(dir:*)"
+      "Bash(python start_server.py:*)"
     ],
     "deny": [],
     "ask": []

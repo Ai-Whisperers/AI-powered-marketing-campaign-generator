@@ -1,0 +1,126 @@
+# Resumen de Ideas - {{ brand }}
+
+## Índice de Ideas
+
+| # | Nombre | Concepto | Puntaje | Tier |
+|---|--------|----------|---------|------|
+{% for idea in ideas | default([]) %}
+| {{ "%02d"|format(idea.number) }} | {{ idea.name }} | {{ idea.concept }} | {{ idea.score }}/100 | {{ idea.tier }} |
+{% else %}
+| 01 | [Nombre] | [Concepto en 1 línea] | /100 | ⏳ |
+| 02 | [Nombre] | [Concepto en 1 línea] | /100 | ⏳ |
+| 03 | [Nombre] | [Concepto en 1 línea] | /100 | ⏳ |
+| ... | ... | ... | ... | ... |
+{% endfor %}
+
+---
+
+## Clasificación por Tier
+
+### 🏆 POTENCIAL MUY ALTO (90+)
+{% for idea in tier_very_high | default([]) %}
+- **Idea {{ "%02d"|format(idea.number) }}**: {{ idea.name }} ({{ idea.score }}/100)
+{% else %}
+[Ideas con puntaje 90+]
+{% endfor %}
+
+### 🥇 POTENCIAL ALTO (80-89)
+{% for idea in tier_high | default([]) %}
+- **Idea {{ "%02d"|format(idea.number) }}**: {{ idea.name }} ({{ idea.score }}/100)
+{% else %}
+[Ideas con puntaje 80-89]
+{% endfor %}
+
+### 🥈 POTENCIAL MEDIO (70-79)
+{% for idea in tier_medium | default([]) %}
+- **Idea {{ "%02d"|format(idea.number) }}**: {{ idea.name }} ({{ idea.score }}/100)
+{% else %}
+[Ideas con puntaje 70-79]
+{% endfor %}
+
+### ⚠️ REQUIEREN TRABAJO (60-69)
+{% for idea in tier_needs_work | default([]) %}
+- **Idea {{ "%02d"|format(idea.number) }}**: {{ idea.name }} ({{ idea.score }}/100)
+{% else %}
+[Ideas con puntaje 60-69]
+{% endfor %}
+
+### ❌ NO RECOMENDADAS (<60)
+{% for idea in tier_not_recommended | default([]) %}
+- **Idea {{ "%02d"|format(idea.number) }}**: {{ idea.name }} ({{ idea.score }}/100)
+{% else %}
+[Ideas con puntaje menor a 60]
+{% endfor %}
+
+---
+
+## Top 10 - Análisis Detallado
+
+{% for idea in top_10 | default([]) %}
+### #{{ loop.index }}: {{ idea.name }}
+**Puntaje**: {{ idea.score }}/100
+**Por qué destaca**: {{ idea.why }}
+**Ejecución recomendada**: {{ idea.execution }}
+
+{% else %}
+### #1: [Nombre de la Idea]
+**Puntaje**: /100
+**Por qué gana**: [Explicación]
+**Ejecución recomendada**: [Descripción]
+
+### #2: [Nombre de la Idea]
+**Puntaje**: /100
+**Por qué destaca**: [Explicación]
+
+[Continuar hasta #10]
+{% endfor %}
+
+---
+
+## Análisis por Categoría
+
+### Por Tipo de Humor
+- **Humor absurdo**: {{ ideas_humor_absurd | default('[Ideas]') }}
+- **Humor situacional**: {{ ideas_humor_situational | default('[Ideas]') }}
+- **Sin humor**: {{ ideas_no_humor | default('[Ideas]') }}
+
+### Por Formato
+- **Video-first**: {{ ideas_video | default('[Ideas]') }}
+- **Imagen estática**: {{ ideas_image | default('[Ideas]') }}
+- **Interactivo**: {{ ideas_interactive | default('[Ideas]') }}
+
+### Por Conexión Cultural
+- **Alta conexión local**: {{ ideas_cultural_high | default('[Ideas]') }}
+- **Universal**: {{ ideas_universal | default('[Ideas]') }}
+
+---
+
+## Recomendaciones Finales
+
+### Opción A: Máxima Resolución del Brief
+**Idea recomendada**: {{ recommendation_a_idea | default('[Nombre]') }}
+**Por qué**: {{ recommendation_a_why | default('[Justificación]') }}
+
+### Opción B: Máximo Potencial Viral
+**Idea recomendada**: {{ recommendation_b_idea | default('[Nombre]') }}
+**Por qué**: {{ recommendation_b_why | default('[Justificación]') }}
+
+### Opción C: Máxima Diferenciación
+**Idea recomendada**: {{ recommendation_c_idea | default('[Nombre]') }}
+**Por qué**: {{ recommendation_c_why | default('[Justificación]') }}
+
+---
+
+## Próximos Pasos
+
+1. [ ] Seleccionar 1-2 conceptos finales
+2. [ ] Desarrollar ejecuciones detalladas
+3. [ ] Crear mockups visuales
+4. [ ] Preparar presentación
+5. [ ] Definir plan de medios
+
+---
+
+**Total de ideas generadas**: {{ total_ideas | default('0') }}/25
+**Ideas puntuadas**: {{ scored_ideas | default('0') }}
+**Última actualización**: {{ updated_at | default('Noviembre 2024') }}

@@ -1,0 +1,54 @@
+# {{ title }}
+
+## Resumen Ejecutivo
+
+{{ summary | default('[Escribir 2-3 oraciones con los datos clave y cifras principales]') }}
+
+---
+
+## Contenido Principal
+
+### Datos Clave
+
+| Métrica | Valor |
+|---------|-------|
+{% for metric in metrics | default([{'name': '[Métrica 1]', 'value': '[Valor]'}, {'name': '[Métrica 2]', 'value': '[Valor]'}, {'name': '[Métrica 3]', 'value': '[Valor]'}]) %}
+| {{ metric.name }} | {{ metric.value }} |
+{% endfor %}
+
+### Análisis
+
+{{ analysis | default('[Contenido del análisis]') }}
+
+### Hallazgos Principales
+
+{% for finding in findings | default(['[Hallazgo 1]', '[Hallazgo 2]', '[Hallazgo 3]']) %}
+{{ loop.index }}. {{ finding }}
+{% endfor %}
+
+---
+
+## Oportunidades
+
+{% for opportunity in opportunities | default(['[Oportunidad 1]', '[Oportunidad 2]']) %}
+- {{ opportunity }}
+{% endfor %}
+
+## Desafíos
+
+{% for challenge in challenges | default(['[Desafío 1]', '[Desafío 2]']) %}
+- {{ challenge }}
+{% endfor %}
+
+---
+
+## Referencias
+
+{% for reference in references | default(['[Fuente 1] - URL', '[Fuente 2] - URL']) %}
+- {{ reference }}
+{% endfor %}
+
+---
+
+**Última actualización**: {{ updated_at | default('Noviembre 2024') }}
+**Categoría**: {{ category }}

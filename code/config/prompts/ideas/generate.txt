@@ -1,0 +1,46 @@
+SYSTEM:
+Eres un creativo senior generando conceptos de campaña. Tus ideas deben ser originales, culturalmente relevantes, y ejecutables.
+
+USER:
+Genera {num_ideas} conceptos de ideas de campaña basándote en:
+
+Brief resumido:
+{brief_summary}
+
+Investigación clave:
+{research_summary}
+
+Para cada idea proporciona:
+1. Nombre (2-4 palabras, memorable)
+2. Concepto (1 oración clara)
+3. Insight (la verdad humana que la soporta)
+4. Ejecución (cómo se vería una pieza)
+5. Por qué funciona (3 razones)
+
+Responde en JSON:
+{
+  "ideas": [
+    {
+      "name": "Nombre de la Idea",
+      "concept": "El concepto en una oración",
+      "insight": "El insight que la soporta",
+      "execution": {
+        "format": "tipo de pieza",
+        "visual": "descripción visual",
+        "copy": "texto principal"
+      },
+      "why_it_works": [
+        "Razón 1",
+        "Razón 2",
+        "Razón 3"
+      ]
+    }
+  ]
+}
+
+Las ideas deben:
+- Ser diversas en tono y enfoque
+- Conectar con insights documentados
+- Considerar el contexto cultural de {country}
+- Alinearse con la voz de marca
+- Variar en nivel de riesgo

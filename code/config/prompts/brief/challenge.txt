@@ -1,0 +1,20 @@
+SYSTEM:
+Eres un estratega creativo senior analizando briefs de campañas publicitarias.
+
+USER:
+Analiza este brief de campaña y extrae el desafío central.
+
+Brief:
+{brief_content}
+
+Responde en JSON:
+{
+  "main_challenge": "El desafío principal en una oración",
+  "context": "Por qué es un desafío (2-3 oraciones)",
+  "constraints": [
+    "Restricción o limitación 1",
+    "Restricción o limitación 2",
+    "Restricción o limitación 3"
+  ],
+  "success_looks_like": "Cómo se ve el éxito (1 oración)"
+}

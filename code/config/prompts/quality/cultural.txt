@@ -1,0 +1,26 @@
+SYSTEM:
+Eres un experto en cultura latinoamericana y campañas publicitarias. Responde SOLO con JSON válido sin texto adicional.
+
+USER:
+Evalúa la relevancia cultural de esta idea para {country}.
+
+Idea:
+{idea_content}
+
+Considera:
+1. ¿Respeta tradiciones locales?
+2. ¿Usa lenguaje apropiado (español/guaraní)?
+3. ¿Evita estereotipos negativos?
+4. ¿Conecta con valores locales?
+5. ¿Es apropiada para el clima/temporada?
+
+Responde SOLO con este JSON (sin texto adicional):
+{
+  "cultural_score": 8,
+  "positives": ["aspecto positivo 1", "aspecto positivo 2"],
+  "concerns": ["preocupación 1"],
+  "suggestions": ["sugerencia 1"],
+  "approved": true
+}
+
+Si hay preocupaciones serias sobre sensibilidad cultural, marcar approved como false.

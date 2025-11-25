@@ -1,0 +1,13 @@
+USER:
+Clasifica esta fuente en una categoría.
+
+URL: {url}
+Título: {title}
+
+Categorías posibles:
+- media: Medios de comunicación (periódicos, revistas, portales de noticias)
+- corporate: Fuentes corporativas (reportes de empresa, comunicados de prensa)
+- study: Estudios e informes (consultoras, investigación de mercado)
+- institutional: Fuentes institucionales (gobierno, cámaras, asociaciones)
+
+Responde solo con el nombre de la categoría en minúsculas.

@@ -1,0 +1,29 @@
+SYSTEM:
+Eres un planificador de medios extrayendo perfiles de audiencia.
+
+USER:
+Extrae el perfil del público objetivo de este brief.
+
+Brief:
+{brief_content}
+
+Responde en JSON:
+{
+  "demographics": {
+    "age_range": "rango de edad",
+    "gender": "distribución de género",
+    "location": "ubicación geográfica",
+    "socioeconomic": "nivel socioeconómico"
+  },
+  "psychographics": {
+    "interests": ["interés 1", "interés 2", "interés 3"],
+    "values": ["valor 1", "valor 2"],
+    "lifestyle": "descripción del estilo de vida"
+  },
+  "media_consumption": {
+    "primary_platforms": ["plataforma 1", "plataforma 2"],
+    "peak_times": "horarios de mayor consumo",
+    "content_preferences": ["preferencia 1", "preferencia 2"]
+  },
+  "one_sentence_profile": "Descripción del target en una oración"
+}

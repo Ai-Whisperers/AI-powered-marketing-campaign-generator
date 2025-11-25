@@ -1,0 +1,26 @@
+USER:
+Basándote en esta investigación y brief, genera listas de Qué SÍ hacer y Qué NO hacer para el equipo creativo.
+
+Investigación:
+{research_content}
+
+Brief:
+{brief_summary}
+
+Genera exactamente 5 de cada uno.
+
+Responde en JSON:
+{
+  "dos": [
+    "Acción específica y clara que SÍ hacer"
+  ],
+  "donts": [
+    "Acción específica y clara que NO hacer"
+  ]
+}
+
+Deben ser:
+- Específicos (no genéricos)
+- Accionables (que el equipo sepa exactamente qué hacer)
+- Basados en la investigación
+- Relevantes para este brief específico

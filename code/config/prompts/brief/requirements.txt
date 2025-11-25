@@ -1,0 +1,15 @@
+USER:
+Extrae los requisitos y restricciones de marca de este brief.
+
+Brief:
+{brief_content}
+
+Responde en JSON:
+{
+  "tone_of_voice": ["adjetivo 1", "adjetivo 2", "adjetivo 3"],
+  "must_include": ["elemento obligatorio 1", "elemento obligatorio 2"],
+  "must_avoid": ["elemento prohibido 1", "elemento prohibido 2"],
+  "visual_guidelines": "descripción de lineamientos visuales",
+  "messaging_pillars": ["pilar 1", "pilar 2"],
+  "competitive_differentiation": "cómo debe diferenciarse de competencia"
+}

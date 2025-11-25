@@ -1,0 +1,63 @@
+{
+  "project": "Demo Beer Campaign",
+  "generated": "2025-01-15T10:30:00Z",
+  "total_sources": 12,
+  "sources": [
+    {
+      "id": 1,
+      "title": "Beer Market in Paraguay 2024",
+      "url": "https://example.com/euromonitor-paraguay",
+      "type": "industry_report",
+      "category": "01-mercado-general",
+      "date_accessed": "2025-01-10",
+      "reliability": "high",
+      "key_data": [
+        "Market size: USD 450M",
+        "Growth rate: 8%",
+        "Per capita: 40L/year"
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Nielsen Retail Audit Q4 2024",
+      "url": "https://example.com/nielsen-paraguay",
+      "type": "market_research",
+      "category": "01-mercado-general",
+      "date_accessed": "2025-01-10",
+      "reliability": "high",
+      "key_data": [
+        "Brahma: 45% share",
+        "Pilsen: 30% share",
+        "Premium growing 12%"
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Análisis de Redes Sociales - Cerveza Paraguay",
+      "url": "https://example.com/social-analysis",
+      "type": "social_listening",
+      "category": "02-competencia",
+      "date_accessed": "2025-01-11",
+      "reliability": "medium",
+      "key_data": [
+        "Brahma: 150K followers",
+        "Top hashtags: #AsadoPy #FutbolPy",
+        "Peak engagement: weekends"
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Entrevista Distribuidor Asunción",
+      "url": null,
+      "type": "primary_research",
+      "category": "03-consumidor",
+      "date_accessed": "2025-01-12",
+      "reliability": "medium",
+      "key_data": [
+        "Young buyers prefer imported",
+        "Price sensitivity varies by zone",
+        "Weekend purchases spike 3x"
+      ]
+    }
+  ]
+}

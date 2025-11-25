@@ -1,0 +1,24 @@
+USER:
+Genera 3-5 insights clave en formato problema-realidad-oportunidad.
+
+Investigación:
+{research_content}
+
+Brief:
+{brief_summary}
+
+Responde en JSON:
+{
+  "insights": [
+    {
+      "problem": "Lo que la gente asume o el desafío visible",
+      "reality": "Lo que realmente está pasando",
+      "opportunity": "Cómo la marca puede aprovecharlo"
+    }
+  ]
+}
+
+Cada insight debe ser:
+- Accionable para creatividad
+- Específico (con datos cuando sea posible)
+- Relevante para la estrategia de campaña

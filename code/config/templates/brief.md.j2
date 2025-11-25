@@ -1,0 +1,116 @@
+# Brief de Campaña - {{ brand }}
+
+## Información General
+
+**Marca**: {{ brand }}
+**País**: {{ country }}
+**Tipo de Campaña**: {{ campaign_type }}
+**Fecha de Análisis**: {{ analysis_date | default('Noviembre 2024') }}
+
+---
+
+## El Desafío
+
+> "{{ challenge_main | default('[Escribir el desafío principal en una frase]') }}"
+
+### Contexto
+{{ challenge_context | default('[Describir el contexto y situación actual]') }}
+
+### Objetivo Principal
+{{ main_objective | default('[Definir el objetivo principal de la campaña]') }}
+
+### Objetivos Secundarios
+{% for obj in secondary_objectives | default(['[Objetivo 1]', '[Objetivo 2]', '[Objetivo 3]']) %}
+- {{ obj }}
+{% endfor %}
+
+---
+
+## Target
+
+### Demográfico
+- **Edad**: {{ target_age | default('[Rango]') }}
+- **Género**: {{ target_gender | default('[Distribución]') }}
+- **NSE**: {{ target_nse | default('[Nivel socioeconómico]') }}
+- **Ubicación**: {{ target_location | default('[Geografía]') }}
+
+### Psicográfico
+- **Intereses**: {{ target_interests | default('[Lista]') }}
+- **Valores**: {{ target_values | default('[Lista]') }}
+- **Comportamiento**: {{ target_behavior | default('[Descripción]') }}
+
+### Consumo de Medios
+- **Redes sociales**: {{ target_social | default('[Plataformas principales]') }}
+- **Horarios**: {{ target_hours | default('[Picos de consumo]') }}
+- **Formatos preferidos**: {{ target_formats | default('[Video, imagen, texto]') }}
+
+---
+
+## Competencia
+
+### Directa
+| Competidor | Fortaleza | Debilidad |
+|------------|-----------|-----------|
+{% for comp in competitors_direct | default([{'name': '[Comp 1]', 'strength': '[F]', 'weakness': '[D]'}, {'name': '[Comp 2]', 'strength': '[F]', 'weakness': '[D]'}]) %}
+| {{ comp.name }} | {{ comp.strength }} | {{ comp.weakness }} |
+{% endfor %}
+
+### Indirecta
+{{ competitors_indirect | default('[Describir competidores indirectos]') }}
+
+---
+
+## Tono y Voz
+
+**Personalidad de marca**: {{ brand_personality | default('[Adjetivos]') }}
+**Tono de comunicación**: {{ brand_tone | default('[Descripción]') }}
+**Qué NO hacer**: {{ brand_restrictions | default('[Restricciones]') }}
+
+---
+
+## Entregables Requeridos
+
+{% for deliverable in deliverables | default(['[Entregable 1]', '[Entregable 2]', '[Entregable 3]']) %}
+- [ ] {{ deliverable }}
+{% endfor %}
+
+---
+
+## KPIs de Éxito
+
+| KPI | Meta | Medición |
+|-----|------|----------|
+{% for kpi in kpis | default([{'name': '[KPI 1]', 'goal': '[Meta]', 'measure': '[Cómo medir]'}, {'name': '[KPI 2]', 'goal': '[Meta]', 'measure': '[Cómo medir]'}]) %}
+| {{ kpi.name }} | {{ kpi.goal }} | {{ kpi.measure }} |
+{% endfor %}
+
+---
+
+## Timeline
+
+| Fase | Fecha | Entregable |
+|------|-------|------------|
+| Investigación | {{ timeline_research | default('[Fecha]') }} | Research completo |
+| Ideación | {{ timeline_ideation | default('[Fecha]') }} | 20-25 ideas |
+| Selección | {{ timeline_selection | default('[Fecha]') }} | Top 3 conceptos |
+| Ejecución | {{ timeline_execution | default('[Fecha]') }} | Materiales finales |
+
+---
+
+## Direcciones Creativas Sugeridas
+
+{% for direction in directions | default([{'name': '[Nombre]', 'description': '[Descripción breve]'}, {'name': '[Nombre]', 'description': '[Descripción breve]'}, {'name': '[Nombre]', 'description': '[Descripción breve]'}]) %}
+### Dirección {{ loop.index }}: "{{ direction.name }}"
+{{ direction.description }}
+
+{% endfor %}
+
+---
+
+## Notas Adicionales
+
+{{ additional_notes | default('[Cualquier información relevante adicional]') }}
+
+---
+
+**Última actualización**: {{ updated_at | default('Noviembre 2024') }}

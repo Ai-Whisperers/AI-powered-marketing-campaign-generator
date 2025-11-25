@@ -1,0 +1,130 @@
+# Campaign Generator - Default Configuration
+# Override values via environment variables or custom config file
+
+# Project defaults
+project:
+  default_country: "Paraguay"
+  default_type: "digital"
+  default_year: 2025
+  num_ideas: 25
+
+# Research categories
+research:
+  categories:
+    - id: "01-mercado-general"
+      name: "Mercado General"
+      files: ["resumen-mercado.md", "tendencias.md"]
+    - id: "02-marca"
+      name: "Análisis de Marca"
+      files: ["historia.md", "posicionamiento.md", "productos-servicios.md"]
+    - id: "03-competencia"
+      name: "Competencia"
+      files: ["directa.md", "indirecta.md", "analisis-comparativo.md"]
+    - id: "04-consumidor"
+      name: "Consumidor"
+      files: ["perfil-demografico.md", "comportamiento-compra.md", "insights.md"]
+    - id: "05-cultura"
+      name: "Cultura"
+      files: ["local.md", "tradiciones.md", "lenguaje-jerga.md"]
+    - id: "06-tendencias"
+      name: "Tendencias"
+      files: ["industria.md", "digital.md"]
+    - id: "07-estadisticas"
+      name: "Estadísticas"
+      files: ["datos-clave.md", "metricas-mercado.md"]
+    - id: "08-referencias"
+      name: "Referencias"
+      files: ["fuentes-completas.md"]
+    - id: "09-nuevos-hallazgos"
+      name: "Nuevos Hallazgos"
+      files: ["RESUMEN-NUEVOS-HALLAZGOS.md"]
+    - id: "10-investigacion-creativa"
+      name: "Investigación Creativa"
+      files:
+        - "01-campanas-ganadoras.md"
+        - "02-contenido-viral.md"
+        - "03-comportamiento-digital.md"
+        - "04-lenguaje-jerga.md"
+        - "05-insights-temporada.md"
+        - "06-analisis-redes-marca.md"
+        - "07-referencias-visuales.md"
+
+# Scoring configuration
+scoring:
+  criteria:
+    - name: "Diferenciación"
+      weight: 1.0
+      description: "¿Se destaca de la competencia?"
+    - name: "Autenticidad"
+      weight: 1.0
+      description: "¿Es genuinamente cultural?"
+    - name: "Potencial Viral"
+      weight: 1.0
+      description: "¿La gente lo compartirá?"
+    - name: "Conexión Emocional"
+      weight: 1.0
+      description: "¿Genera engagement?"
+    - name: "Ejecutabilidad"
+      weight: 1.0
+      description: "¿Es viable de producir?"
+    - name: "Esencia de Marca"
+      weight: 1.0
+      description: "¿Mantiene identidad de marca?"
+    - name: "Target Connection"
+      weight: 1.0
+      description: "¿Conecta con la audiencia?"
+    - name: "Formato Digital"
+      weight: 1.0
+      description: "¿Funciona en redes sociales?"
+    - name: "Memorable"
+      weight: 1.0
+      description: "¿Será recordado?"
+    - name: "Valor al Consumidor"
+      weight: 1.0
+      description: "¿Agrega valor?"
+
+  thresholds:
+    very_high: 90
+    high: 80
+    medium: 70
+    needs_work: 60
+
+# AI configuration
+ai:
+  primary: "anthropic"
+  fallback: "openai"
+
+  anthropic:
+    model: "claude-sonnet-4-20250514"
+    max_tokens: 4096
+    temperature: 0.7
+
+  openai:
+    model: "gpt-4-turbo"
+    max_tokens: 4096
+    temperature: 0.7
+
+# Export settings
+export:
+  pdf:
+    font_family: "Helvetica"
+    font_size: 11
+    margin: 72
+    include_cover: true
+    include_toc: true
+
+  pptx:
+    template: "default"
+    include_notes: true
+
+# Logging
+logging:
+  level: "INFO"
+  format: "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
+  file: null  # Set to path to enable file logging
+
+# Server
+server:
+  host: "0.0.0.0"
+  port: 8000
+  reload: true  # For development

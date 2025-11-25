@@ -1,0 +1,109 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: campaign-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=campaign_generator
+      - POSTGRES_USER=campaign_user
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - campaign-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U campaign_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for Celery
+  redis:
+    image: redis:7-alpine
+    container_name: campaign-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - campaign-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+
+
+  # Python FastAPI Backend
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: campaign-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - PROJECTS_DIR=/data/projects
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - DATABASE_URL=postgresql+asyncpg://campaign_user:${POSTGRES_PASSWORD:-changeme}@postgres:5432/campaign_generator
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - projects:/data/projects
+      - ./config:/app/config:ro
+    networks:
+      - campaign-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Celery Worker
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: campaign-celery
+    restart: unless-stopped
+    command: celery -A api.tasks.celery_app worker --loglevel=info
+    environment:
+      - PROJECTS_DIR=/data/projects
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DATABASE_URL=postgresql+asyncpg://campaign_user:${POSTGRES_PASSWORD:-changeme}@postgres:5432/campaign_generator
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - projects:/data/projects
+      - ./config:/app/config:ro
+    networks:
+      - campaign-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  n8n_data:
+    driver: local
+  projects:
+    driver: local
+
+networks:
+  campaign-network:
+    driver: bridge

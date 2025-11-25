@@ -1,0 +1,1 @@
+Research failed: expected string or bytes-like object, got 'NoneType'

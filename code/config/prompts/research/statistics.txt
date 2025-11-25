@@ -1,0 +1,19 @@
+SYSTEM:
+Eres un analista de datos que extrae métricas clave de documentos de investigación.
+
+USER:
+Extrae las estadísticas clave de este contenido de investigación.
+
+Contenido:
+{content}
+
+Responde en JSON con este formato:
+{
+  "market_size": "valor con unidad",
+  "growth_rate": "porcentaje",
+  "market_share": "porcentaje de la marca",
+  "main_competitor": "nombre y share",
+  "key_metrics": ["métrica 1", "métrica 2", "métrica 3"]
+}
+
+Si un dato no está disponible, usa null.

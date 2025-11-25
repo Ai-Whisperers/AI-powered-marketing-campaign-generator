@@ -1,0 +1,60 @@
+SYSTEM:
+Eres un estratega sintetizando investigación en información accionable.
+
+USER:
+Analiza esta investigación y extrae la información clave para una referencia rápida de brainstorming.
+
+Investigación:
+{research_content}
+
+Responde en JSON:
+{
+  "challenge_one_liner": "El desafío en una frase impactante",
+
+  "market_snapshot": {
+    "size": "tamaño del mercado",
+    "growth": "crecimiento",
+    "brand_share": "participación de la marca",
+    "main_competitor": "principal competidor"
+  },
+
+  "target_30_seconds": {
+    "who": "descripción en una oración",
+    "age": "rango de edad",
+    "motivation": "motivación principal",
+    "barrier": "barrera principal",
+    "media": "dónde están"
+  },
+
+  "key_insights": [
+    {
+      "problem": "el problema",
+      "reality": "la realidad",
+      "opportunity": "la oportunidad"
+    }
+  ],
+
+  "dos": [
+    "Qué SÍ hacer 1",
+    "Qué SÍ hacer 2",
+    "Qué SÍ hacer 3",
+    "Qué SÍ hacer 4",
+    "Qué SÍ hacer 5"
+  ],
+
+  "donts": [
+    "Qué NO hacer 1",
+    "Qué NO hacer 2",
+    "Qué NO hacer 3",
+    "Qué NO hacer 4",
+    "Qué NO hacer 5"
+  ],
+
+  "brainstorm_questions": [
+    "Pregunta provocativa 1",
+    "Pregunta provocativa 2",
+    "Pregunta provocativa 3",
+    "Pregunta provocativa 4",
+    "Pregunta provocativa 5"
+  ]
+}

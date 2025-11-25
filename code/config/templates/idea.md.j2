@@ -1,0 +1,79 @@
+# Idea {{ "%02d"|format(idea_number) }}: "{{ title | default('[Nombre de la Idea]') }}"
+
+## Tier: {{ tier | default('Sin clasificar') }}
+
+**Puntuación: {{ overall_score | default(0) }}/10**
+
+---
+
+## Concepto Central
+
+{{ concept | default('[Una oración que describe la idea central]') }}
+
+---
+
+## Insight Clave
+
+> "{{ insight | default('[Cita del research o brief que inspira esta idea]') }}"
+
+---
+
+## Ejecución
+
+{% if execution %}
+{% for format, description in execution.items() %}
+### {{ format | title }}
+
+{{ description }}
+
+{% endfor %}
+{% else %}
+*Ejecución pendiente de desarrollo*
+{% endif %}
+
+---
+
+## Puntuación Detallada
+
+| Criterio | Puntaje |
+|----------|---------|
+{% if scores %}
+{% for criterion, score in scores.items() %}
+| {{ criterion | replace('_', ' ') | title }} | {{ score }}/10 |
+{% endfor %}
+{% endif %}
+| **Promedio Ponderado** | **{{ overall_score | default(0) }}/10** |
+
+---
+
+## Fortalezas
+
+{% if strengths %}
+{% for strength in strengths %}
+✅ {{ strength }}
+{% endfor %}
+{% else %}
+*Sin fortalezas identificadas*
+{% endif %}
+
+---
+
+## Debilidades
+
+{% if weaknesses %}
+{% for weakness in weaknesses %}
+⚠️ {{ weakness }}
+{% endfor %}
+{% else %}
+*Sin debilidades identificadas*
+{% endif %}
+
+---
+
+## Recomendación
+
+{{ recommendation | default('Sin recomendación específica') }}
+
+---
+
+**Fecha de creación**: {{ created_at | default('Noviembre 2024') }}
