@@ -24,37 +24,26 @@ logger = get_logger("file_operations")
 # File Operations Service
 # =============================================================================
 
+
 class FileOperationsService:
     """
     Service for managing project files and directories.
-    
+
     Uses hybrid storage: database for metadata, files for content.
     """
 
-    def __init__(
-        self,
-        projects_dir: Path | None = None,
-        project_repository: Any | None = None
-    ):
+    def __init__(self):
         """
         Initialize file operations service.
-
-        Args:
-            projects_dir: Base directory for projects
-            project_repository: Optional repository for database operations
         """
-        if projects_dir is None:
-            settings = get_settings()
-            projects_dir = settings.projects_dir
-
-        self.projects_dir = projects_dir
         self.config = get_project_config()
-        self.project_repository = project_repository
+        self.settings = get_settings()
+        self.base_path = Path(self.settings.projects_dir)
 
         # Ensure projects directory exists
-        self.projects_dir.mkdir(parents=True, exist_ok=True)
+        self.base_path.mkdir(parents=True, exist_ok=True)
 
-        logger.info(f"File operations service initialized: {projects_dir}")
+        logger.info(f"File operations service initialized: {self.base_path}")
 
     # =========================================================================
     # Project Operations
@@ -67,11 +56,11 @@ class FileOperationsService:
         client: str = "",
         country: str | None = None,
         language: str | None = None,
-        campaign_type: str = "social"
+        campaign_type: str = "social",
     ) -> dict[str, Any]:
         """
         Create directory structure for a new project.
-        
+
         Saves metadata to database (if available) and creates file structure.
 
         Args:
@@ -85,7 +74,7 @@ class FileOperationsService:
         Returns:
             Project metadata dictionary
         """
-        project_dir = self.projects_dir / project_id
+        project_dir = self.base_path / project_id
 
         if project_dir.exists():
             logger.warning(f"Project directory already exists: {project_id}")
@@ -114,29 +103,10 @@ class FileOperationsService:
             "status": "created",
             "created_at": now.isoformat() + "Z",
             "brief_parsed": False,
-            "brief_file_path": None
+            "brief_file_path": None,
         }
 
-        # Save to database if repository available
-        if self.project_repository:
-            try:
-                from ..database.models import Project
-                db_project = Project(
-                    id=project_id,
-                    name=project_name,
-                    client=client,
-                    country=metadata["country"],
-                    language=metadata["language"],
-                    campaign_type=campaign_type,
-                    status="created",
-                    created_at=now,
-                    brief_parsed=False
-                )
-                await self.project_repository.create(db_project)
-                logger.info(f"Saved project to database: {project_id}")
-            except Exception as e:
-                logger.warning(f"Failed to save project to database: {e}")
-                # Continue with file-only mode
+        # Project saved to files only
 
         # Save metadata file (backward compatibility)
         metadata_path = project_dir / "project.yaml"
@@ -244,12 +214,7 @@ class FileOperationsService:
     # File Operations
     # =========================================================================
 
-    async def write_file(
-        self,
-        project_id: str,
-        relative_path: str,
-        content: str
-    ) -> Path:
+    async def write_file(self, project_id: str, relative_path: str, content: str) -> Path:
         """
         Write content to a file in project.
 
@@ -298,12 +263,7 @@ class FileOperationsService:
         async with aiofiles.open(file_path, encoding="utf-8") as f:
             return await f.read()
 
-    def list_files(
-        self,
-        project_id: str,
-        directory: str = "",
-        pattern: str = "*"
-    ) -> list[str]:
+    def list_files(self, project_id: str, directory: str = "", pattern: str = "*") -> list[str]:
         """
         List files in a project directory.
 
@@ -341,11 +301,7 @@ class FileOperationsService:
     # =========================================================================
 
     async def save_research_file(
-        self,
-        project_id: str,
-        category: str,
-        filename: str,
-        content: str
+        self, project_id: str, category: str, filename: str, content: str
     ) -> Path:
         """
         Save a research file.
@@ -385,12 +341,7 @@ class FileOperationsService:
     # Ideas Operations
     # =========================================================================
 
-    async def save_idea(
-        self,
-        project_id: str,
-        idea_number: int,
-        content: str
-    ) -> Path:
+    async def save_idea(self, project_id: str, idea_number: int, content: str) -> Path:
         """
         Save an idea file.
 
@@ -460,7 +411,7 @@ class FileOperationsService:
             "project": project_id,
             "generated": datetime.utcnow().isoformat() + "Z",
             "total_sources": len(sources),
-            "sources": sources
+            "sources": sources,
         }
 
         content = json.dumps(sources_data, indent=2, ensure_ascii=False)

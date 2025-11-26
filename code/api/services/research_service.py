@@ -21,23 +21,24 @@ logger = get_logger("research_service")
 # Research Service
 # =============================================================================
 
+
 class ResearchService:
     """
     Service for processing and summarizing research content.
     """
 
-    def __init__(self, research_repository: Any | None = None):
+    def __init__(self):
+        """
+        Initialize research service.
+        """
         self.ai = get_ai_manager()
         self.prompts = get_prompt_loader()
         self.files = get_file_service()
         self.renderer = get_template_renderer()
         self.fetcher = get_web_fetcher()
-        self.research_repository = research_repository
 
     async def add_research(
-        self,
-        project_id: str,
-        sources: list[ResearchSource]
+        self, project_id: str, sources: list[ResearchSource]
     ) -> ResearchAddResponse:
         """
         Add research sources to a project.
@@ -77,10 +78,7 @@ class ResearchService:
             # Classify source type
             source_type = source.type
             if source.url:
-                source_type = self.fetcher.classify_source_type(
-                    str(source.url),
-                    content
-                )
+                source_type = self.fetcher.classify_source_type(str(source.url), content)
 
             # Generate filename
             filename = self._generate_filename(title)
@@ -90,43 +88,24 @@ class ResearchService:
                 title=title,
                 category=source.category,
                 content=summary.summary,
-                sources=[{
-                    "url": str(source.url) if source.url else "",
-                    "title": title,
-                    "type": source_type,
-                    "accessed": datetime.utcnow().strftime("%Y-%m-%d")
-                }],
-                key_statistics=[s.get("text", "") for s in statistics[:5]]
+                sources=[
+                    {
+                        "url": str(source.url) if source.url else "",
+                        "title": title,
+                        "type": source_type,
+                        "accessed": datetime.utcnow().strftime("%Y-%m-%d"),
+                    }
+                ],
+                key_statistics=[s.get("text", "") for s in statistics[:5]],
             )
 
             # Save file
             file_path = await self.files.save_research_file(
-                project_id,
-                source.category,
-                filename,
-                rendered
+                project_id, source.category, filename, rendered
             )
             files_created.append(str(file_path))
 
-            # Save to database if repository available
-            if self.research_repository:
-                try:
-                    from ..database.models import ResearchItem
-
-                    db_research = ResearchItem(
-                        project_id=project_id,
-                        category=source.category,
-                        title=title,
-                        source_url=str(source.url) if source.url else None,
-                        source_type=source_type,
-                        file_path=str(file_path),
-                        relevance_score=summary.relevance_score,
-                        created_at=datetime.utcnow()
-                    )
-                    await self.research_repository.create(db_research)
-                    logger.debug(f"Saved research item to database: {title}")
-                except Exception as e:
-                    logger.warning(f"Failed to save research to database: {e}")
+            # Research saved to files only
 
             # Track source
             source_record = {
@@ -136,16 +115,15 @@ class ResearchService:
                 "category": source.category,
                 "date_accessed": datetime.utcnow().strftime("%Y-%m-%d"),
                 "reliability": self._assess_reliability(source_type),
-                "key_data": [s.get("text", "") for s in statistics[:3]]
+                "key_data": [s.get("text", "") for s in statistics[:3]],
             }
             await self.files.add_source(project_id, source_record)
             sources_tracked.append(source_record)
 
         # Update project status
-        self.files.update_project_metadata(project_id, {
-            "status": "researching",
-            "research_count": len(files_created)
-        })
+        self.files.update_project_metadata(
+            project_id, {"status": "researching", "research_count": len(files_created)}
+        )
 
         logger.info(f"Added {len(files_created)} research files to project: {project_id}")
 
@@ -153,7 +131,7 @@ class ResearchService:
             project_id=project_id,
             added_count=len(sources),
             files_created=[f.split("/")[-1] for f in files_created],
-            sources_tracked=len(sources_tracked)
+            sources_tracked=len(sources_tracked),
         )
 
     async def _summarize_content(self, content: str, category: str) -> ResearchSummary:
@@ -170,16 +148,10 @@ class ResearchService:
         logger.debug(f"Summarizing content for category: {category}")
 
         system, user = self.prompts.format(
-            "research", "summary",
-            content=content,
-            research_category=category
+            "research", "summary", content=content, research_category=category
         )
 
-        response = await self.ai.generate_json(
-            prompt=user,
-            system=system,
-            temperature=0.3
-        )
+        response = await self.ai.generate_json(prompt=user, system=system, temperature=0.3)
 
         return ResearchSummary(
             title=response.get("title", "Research Summary"),
@@ -187,7 +159,7 @@ class ResearchService:
             key_points=response.get("key_points", []),
             statistics=response.get("statistics", []),
             relevance_score=response.get("relevance_score", 5.0),
-            source_type=response.get("source_type", "web")
+            source_type=response.get("source_type", "web"),
         )
 
     async def _extract_statistics(self, content: str) -> list[dict[str, Any]]:
@@ -202,16 +174,9 @@ class ResearchService:
         """
         logger.debug("Extracting statistics from content")
 
-        system, user = self.prompts.format(
-            "research", "statistics",
-            content=content
-        )
+        system, user = self.prompts.format("research", "statistics", content=content)
 
-        response = await self.ai.generate_json(
-            prompt=user,
-            system=system,
-            temperature=0.2
-        )
+        response = await self.ai.generate_json(prompt=user, system=system, temperature=0.2)
 
         return response.get("statistics", [])
 

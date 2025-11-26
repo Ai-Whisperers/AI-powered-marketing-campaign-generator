@@ -36,26 +36,29 @@ settings = get_settings()
 # Ideas Service
 # =============================================================================
 
+
 class IdeasService:
     """
     Service for generating, expanding, and scoring campaign ideas.
     """
 
-    def __init__(self, idea_repository: Any | None = None):
+    def __init__(self):
+        """
+        Initialize ideas service.
+        """
         self.ai = get_ai_manager()
         self.prompts = get_prompt_loader()
         self.files = get_file_service()
         self.renderer = get_template_renderer()
         self.research = get_research_service()
         self.config = get_settings()
-        self.idea_repository = idea_repository
 
     async def generate_ideas(
         self,
         project_id: str,
         num_ideas: int = 25,
         batch_size: int = 5,
-        creative_directions: list[str] | None = None
+        creative_directions: list[str] | None = None,
     ) -> IdeaGenerateResponse:
         """
         Generate campaign idea concepts.
@@ -113,7 +116,7 @@ class IdeasService:
                 brief=brief,
                 num_ideas=current_batch_size,
                 existing_ideas=[c.title for c in all_concepts],
-                creative_directions=creative_directions
+                creative_directions=creative_directions,
             )
 
             # Assign numbers
@@ -138,10 +141,7 @@ class IdeasService:
                 try:
                     # Expand the idea
                     expanded = await self._expand_single_idea(
-                        concept=concept,
-                        brief=brief,
-                        quick_reference=quick_ref,
-                        country=country
+                        concept=concept, brief=brief, quick_reference=quick_ref, country=country
                     )
                     expanded.number = concept.number
 
@@ -162,7 +162,7 @@ class IdeasService:
                         "versatilidad": expanded.scores.versatilidad,
                         "alineacion_marca": expanded.scores.alineacion_marca,
                         "potencial_pr": expanded.scores.potencial_pr,
-                        "escalabilidad": expanded.scores.escalabilidad
+                        "escalabilidad": expanded.scores.escalabilidad,
                     }
 
                     # Update cultural score
@@ -174,8 +174,12 @@ class IdeasService:
                     expanded.tier = self._get_tier(expanded.overall_score)
 
                     # Merge strengths/weaknesses
-                    expanded.strengths = list(set(expanded.strengths + quality.strengths + cultural.positives))
-                    expanded.weaknesses = list(set(expanded.weaknesses + quality.weaknesses + cultural.concerns))
+                    expanded.strengths = list(
+                        set(expanded.strengths + quality.strengths + cultural.positives)
+                    )
+                    expanded.weaknesses = list(
+                        set(expanded.weaknesses + quality.weaknesses + cultural.concerns)
+                    )
 
                     # Render and save
                     rendered = self.renderer.render_idea(
@@ -189,33 +193,12 @@ class IdeasService:
                         tier=expanded.tier,
                         strengths=expanded.strengths,
                         weaknesses=expanded.weaknesses,
-                        recommendation=expanded.recommendation
+                        recommendation=expanded.recommendation,
                     )
 
                     file_path = await self.files.save_idea(project_id, expanded.number, rendered)
 
-                    # Save to database if repository available
-                    if self.idea_repository:
-                        try:
-                            import json
-                            from datetime import datetime
-
-                            from ..database.models import Idea
-
-                            db_idea = Idea(
-                                project_id=project_id,
-                                number=expanded.number,
-                                title=expanded.title,
-                                file_path=str(file_path),
-                                overall_score=expanded.overall_score,
-                                tier=expanded.tier,
-                                scores_json=json.dumps(scores_dict),
-                                created_at=datetime.utcnow()
-                            )
-                            await self.idea_repository.create(db_idea)
-                            logger.debug(f"Saved idea {expanded.number} to database")
-                        except Exception as e:
-                            logger.warning(f"Failed to save idea to database: {e}")
+                    # Idea saved to files only
 
                     logger.debug(f"Expanded and saved idea {expanded.number}: {expanded.title}")
                     return str(file_path)
@@ -229,10 +212,9 @@ class IdeasService:
         files_created = [r for r in results if r is not None]
 
         # Update project status
-        self.files.update_project_metadata(project_id, {
-            "status": "ideas_generated",
-            "ideas_count": len(all_concepts)
-        })
+        self.files.update_project_metadata(
+            project_id, {"status": "ideas_generated", "ideas_count": len(all_concepts)}
+        )
 
         logger.info(f"Generated and saved {len(files_created)} ideas for project: {project_id}")
 
@@ -240,9 +222,8 @@ class IdeasService:
             project_id=project_id,
             ideas_generated=len(all_concepts),
             concepts=all_concepts,
-            files_created=[f.split("/")[-1].split("\\")[-1] for f in files_created]
+            files_created=[f.split("/")[-1].split("\\")[-1] for f in files_created],
         )
-
 
     async def _generate_batch(
         self,
@@ -251,7 +232,7 @@ class IdeasService:
         brief: str,
         num_ideas: int,
         existing_ideas: list[str],
-        creative_directions: list[str] | None
+        creative_directions: list[str] | None,
     ) -> list[IdeaConcept]:
         """Generate a batch of idea concepts."""
 
@@ -267,21 +248,24 @@ RESEARCH SUMMARY:
 {research_content[:5000] if research_content else "No research available"}
 """
 
-        existing_str = "\n".join(f"- {idea}" for idea in existing_ideas) if existing_ideas else "None"
-        directions_str = ", ".join(creative_directions) if creative_directions else "Any creative direction"
+        existing_str = (
+            "\n".join(f"- {idea}" for idea in existing_ideas) if existing_ideas else "None"
+        )
+        directions_str = (
+            ", ".join(creative_directions) if creative_directions else "Any creative direction"
+        )
 
         system, user = self.prompts.format(
-            "ideas", "generate",
+            "ideas",
+            "generate",
             context=context,
             num_ideas=num_ideas,
             existing_ideas=existing_str,
-            creative_directions=directions_str
+            creative_directions=directions_str,
         )
 
         response = await self.ai.generate_json(
-            prompt=user,
-            system=system,
-            temperature=0.8  # Higher for creativity
+            prompt=user, system=system, temperature=0.8  # Higher for creativity
         )
 
         concepts = []
@@ -297,21 +281,25 @@ RESEARCH SUMMARY:
             is_similar, score, similar_to = check_idea_similarity(
                 idea,
                 existing_dicts,
-                threshold=0.6  # Slightly higher threshold for batch generation
+                threshold=0.6,  # Slightly higher threshold for batch generation
             )
 
             if is_similar:
-                logger.info(f"Skipping similar idea: '{title}' (similar to '{similar_to}', score: {score:.2f})")
+                logger.info(
+                    f"Skipping similar idea: '{title}' (similar to '{similar_to}', score: {score:.2f})"
+                )
                 continue
 
             logger.info(f"Adding idea: {title}")
-            concepts.append(IdeaConcept(
-                number=0,  # Will be assigned later
-                title=title,
-                concept=idea.get("concept", ""),
-                insight=idea.get("insight", ""),
-                formats=idea.get("formats", [])
-            ))
+            concepts.append(
+                IdeaConcept(
+                    number=0,  # Will be assigned later
+                    title=title,
+                    concept=idea.get("concept", ""),
+                    insight=idea.get("insight", ""),
+                    formats=idea.get("formats", []),
+                )
+            )
 
             # Add to existing dicts so we don't generate duplicates within the same batch
             existing_dicts.append(idea)
@@ -320,10 +308,7 @@ RESEARCH SUMMARY:
         return concepts
 
     async def expand_idea(
-        self,
-        project_id: str,
-        idea_number: int,
-        concept: IdeaConcept | None = None
+        self, project_id: str, idea_number: int, concept: IdeaConcept | None = None
     ) -> IdeaExpandResponse:
         """
         Expand an idea with full details and scoring.
@@ -356,7 +341,7 @@ RESEARCH SUMMARY:
             concept=concept,
             brief=brief,
             quick_reference=quick_ref,
-            country=metadata.get("country", "Paraguay")
+            country=metadata.get("country", "Paraguay"),
         )
         expanded.number = idea_number
 
@@ -364,10 +349,7 @@ RESEARCH SUMMARY:
         quality = await self._validate_quality(expanded)
 
         # Validate cultural relevance
-        cultural = await self._validate_cultural(
-            expanded,
-            metadata.get("country", "Paraguay")
-        )
+        cultural = await self._validate_cultural(expanded, metadata.get("country", "Paraguay"))
 
         # Calculate final score
         scores_dict = {
@@ -380,7 +362,7 @@ RESEARCH SUMMARY:
             "versatilidad": expanded.scores.versatilidad,
             "alineacion_marca": expanded.scores.alineacion_marca,
             "potencial_pr": expanded.scores.potencial_pr,
-            "escalabilidad": expanded.scores.escalabilidad
+            "escalabilidad": expanded.scores.escalabilidad,
         }
 
         # Update cultural score
@@ -395,7 +377,9 @@ RESEARCH SUMMARY:
 
         # Merge strengths/weaknesses from validations
         expanded.strengths = list(set(expanded.strengths + quality.strengths + cultural.positives))
-        expanded.weaknesses = list(set(expanded.weaknesses + quality.weaknesses + cultural.concerns))
+        expanded.weaknesses = list(
+            set(expanded.weaknesses + quality.weaknesses + cultural.concerns)
+        )
 
         # Render and save
         rendered = self.renderer.render_idea(
@@ -409,44 +393,33 @@ RESEARCH SUMMARY:
             tier=expanded.tier,
             strengths=expanded.strengths,
             weaknesses=expanded.weaknesses,
-            recommendation=expanded.recommendation
+            recommendation=expanded.recommendation,
         )
 
         file_path = await self.files.save_idea(project_id, idea_number, rendered)
 
         logger.info(f"Expanded idea {idea_number} with score {expanded.overall_score}")
 
-        return IdeaExpandResponse(
-            project_id=project_id,
-            idea=expanded,
-            file_path=str(file_path)
-        )
+        return IdeaExpandResponse(project_id=project_id, idea=expanded, file_path=str(file_path))
 
     async def _expand_single_idea(
-        self,
-        concept: IdeaConcept,
-        brief: str,
-        quick_reference: str,
-        country: str
+        self, concept: IdeaConcept, brief: str, quick_reference: str, country: str
     ) -> IdeaExpanded:
         """Expand a single idea concept to full detail."""
 
         system, user = self.prompts.format(
-            "ideas", "expand",
+            "ideas",
+            "expand",
             title=concept.title,
             concept=concept.concept,
             insight=concept.insight,
             formats=", ".join(concept.formats),
             brief=brief[:2000],
             quick_reference=quick_reference[:2000],
-            country=country
+            country=country,
         )
 
-        response = await self.ai.generate_json(
-            prompt=user,
-            system=system,
-            temperature=0.6
-        )
+        response = await self.ai.generate_json(prompt=user, system=system, temperature=0.6)
 
         # Parse scores
         scores_data = response.get("scores", {})
@@ -460,7 +433,7 @@ RESEARCH SUMMARY:
             versatilidad=scores_data.get("versatilidad", 5),
             alineacion_marca=scores_data.get("alineacion_marca", 5),
             potencial_pr=scores_data.get("potencial_pr", 5),
-            escalabilidad=scores_data.get("escalabilidad", 5)
+            escalabilidad=scores_data.get("escalabilidad", 5),
         )
 
         return IdeaExpanded(
@@ -474,7 +447,7 @@ RESEARCH SUMMARY:
             tier="",  # Will be determined
             strengths=response.get("strengths", []),
             weaknesses=response.get("weaknesses", []),
-            recommendation=response.get("recommendation", "")
+            recommendation=response.get("recommendation", ""),
         )
 
     async def _validate_quality(self, idea: IdeaExpanded) -> QualityValidation:
@@ -487,30 +460,19 @@ Insight: {idea.insight}
 Execution: {idea.execution}
 """
 
-        system, user = self.prompts.format(
-            "quality", "validate",
-            idea_content=idea_content
-        )
+        system, user = self.prompts.format("quality", "validate", idea_content=idea_content)
 
-        response = await self.ai.generate_json(
-            prompt=user,
-            system=system,
-            temperature=0.3
-        )
+        response = await self.ai.generate_json(prompt=user, system=system, temperature=0.3)
 
         return QualityValidation(
             scores=response.get("scores", {}),
             overall=response.get("overall", 5),
             strengths=response.get("strengths", []),
             weaknesses=response.get("weaknesses", []),
-            suggestions=response.get("suggestions", [])
+            suggestions=response.get("suggestions", []),
         )
 
-    async def _validate_cultural(
-        self,
-        idea: IdeaExpanded,
-        country: str
-    ) -> CulturalValidation:
+    async def _validate_cultural(self, idea: IdeaExpanded, country: str) -> CulturalValidation:
         """Validate cultural relevance."""
 
         idea_content = f"""
@@ -520,23 +482,17 @@ Insight: {idea.insight}
 """
 
         system, user = self.prompts.format(
-            "quality", "cultural",
-            idea_content=idea_content,
-            country=country
+            "quality", "cultural", idea_content=idea_content, country=country
         )
 
-        response = await self.ai.generate_json(
-            prompt=user,
-            system=system,
-            temperature=0.3
-        )
+        response = await self.ai.generate_json(prompt=user, system=system, temperature=0.3)
 
         return CulturalValidation(
             cultural_score=response.get("cultural_score", 5),
             positives=response.get("positives", []),
             concerns=response.get("concerns", []),
             suggestions=response.get("suggestions", []),
-            approved=response.get("approved", True)
+            approved=response.get("approved", True),
         )
 
     def _calculate_weighted_score(self, scores: dict[str, float]) -> float:
@@ -564,7 +520,7 @@ Insight: {idea.insight}
                 "versatilidad": "versatilidad",
                 "alineacion_con_marca": "alineacion_marca",
                 "potencial_pr": "potencial_pr",
-                "escalabilidad": "escalabilidad"
+                "escalabilidad": "escalabilidad",
             }
             normalized_key = key_mappings.get(key, key)
             weights[normalized_key] = criterion.weight
@@ -580,7 +536,7 @@ Insight: {idea.insight}
         if total_weight == 0:
             return 0
 
-        return (weighted_sum / total_weight)
+        return weighted_sum / total_weight
 
     def _get_tier(self, score: float) -> str:
         """Get tier classification from score."""
@@ -596,9 +552,7 @@ Insight: {idea.insight}
             return "Tier 5 - Reconsiderar"
 
     async def score_all_ideas(
-        self,
-        project_id: str,
-        recalculate: bool = False
+        self, project_id: str, recalculate: bool = False
     ) -> IdeaScoreResponse:
         """
         Score and rank all ideas in a project.
@@ -614,13 +568,7 @@ Insight: {idea.insight}
 
         idea_files = self.files.get_idea_files(project_id)
         ideas_summary = []
-        tier_distribution = {
-            "Tier 1": 0,
-            "Tier 2": 0,
-            "Tier 3": 0,
-            "Tier 4": 0,
-            "Tier 5": 0
-        }
+        tier_distribution = {"Tier 1": 0, "Tier 2": 0, "Tier 3": 0, "Tier 4": 0, "Tier 5": 0}
 
         for file_path in idea_files:
             # Extract idea number from filename
@@ -631,7 +579,9 @@ Insight: {idea.insight}
                 try:
                     idea_num = int(filename.replace("idea-", "").replace(".md", ""))
                 except ValueError:
-                    logger.warning(f"Could not extract idea number from filename: {filename}. Skipping.")
+                    logger.warning(
+                        f"Could not extract idea number from filename: {filename}. Skipping."
+                    )
                     continue
 
                 # Read idea content and extract score
@@ -643,12 +593,9 @@ Insight: {idea.insight}
                 tier = self._get_tier(score)
                 title = self._extract_title_from_markdown(content)
 
-                ideas_summary.append(IdeaSummary(
-                    number=idea_num,
-                    title=title,
-                    overall_score=score,
-                    tier=tier
-                ))
+                ideas_summary.append(
+                    IdeaSummary(number=idea_num, title=title, overall_score=score, tier=tier)
+                )
 
                 # Update tier distribution
                 tier_key = tier.split(" - ")[0]
@@ -657,10 +604,6 @@ Insight: {idea.insight}
             except Exception as e:
                 logger.error(f"Error processing idea file {file_path}: {e}")
                 continue
-
-
-
-
 
         # Sort by score
         ideas_summary.sort(key=lambda x: x.overall_score, reverse=True)
@@ -673,34 +616,24 @@ Insight: {idea.insight}
             project_name=self.files.get_project_metadata(project_id).get("name", ""),
             total_ideas=len(ideas_summary),
             ideas=[
-                {
-                    "number": i.number,
-                    "name": i.title,
-                    "score": i.overall_score,
-                    "tier": i.tier
-                }
+                {"number": i.number, "name": i.title, "score": i.overall_score, "tier": i.tier}
                 for i in ideas_summary
             ],
             top_ideas=[
-                {
-                    "number": i.number,
-                    "name": i.title,
-                    "score": i.overall_score,
-                    "tier": i.tier
-                }
+                {"number": i.number, "name": i.title, "score": i.overall_score, "tier": i.tier}
                 for i in top_ideas
             ],
             tier_distribution=tier_distribution,
-            recommendations=recommendations
+            recommendations=recommendations,
         )
 
         await self.files.write_file(project_id, "ideas-summary.md", summary_content)
 
         # Update project status
-        self.files.update_project_metadata(project_id, {
-            "status": "ideas_scored",
-            "top_score": top_ideas[0].overall_score if top_ideas else 0
-        })
+        self.files.update_project_metadata(
+            project_id,
+            {"status": "ideas_scored", "top_score": top_ideas[0].overall_score if top_ideas else 0},
+        )
 
         logger.info(f"Scored {len(ideas_summary)} ideas for project: {project_id}")
 
@@ -709,14 +642,11 @@ Insight: {idea.insight}
             total_ideas=len(ideas_summary),
             tier_distribution=tier_distribution,
             top_ideas=top_ideas,
-            summary_file="ideas-summary.md"
+            summary_file="ideas-summary.md",
         )
 
     async def _generate_ideas_v2(
-        self,
-        project_id: str,
-        num_ideas: int = 15,
-        batch_size: int = 5
+        self, project_id: str, num_ideas: int = 15, batch_size: int = 5
     ) -> IdeaGenerateResponse:
         """
         Generate ideas using LangGraph v2 with parallel research.
@@ -787,31 +717,35 @@ Insight: {idea.insight}
 *Generado con LangGraph v2 - {datetime.now().strftime('%Y-%m-%d %H:%M')}*
 """
 
-                with open(filename, 'w', encoding='utf-8') as f:
+                with open(filename, "w", encoding="utf-8") as f:
                     f.write(content)
 
                 # Convert to IdeaConcept for compatibility
                 # Extract idea number from ID (e.g., "idea-001" -> 1)
-                idea_number = int(idea['id'].split('-')[-1]) if '-' in idea['id'] else len(saved_concepts) + 1
+                idea_number = (
+                    int(idea["id"].split("-")[-1]) if "-" in idea["id"] else len(saved_concepts) + 1
+                )
 
                 concept = IdeaConcept(
                     number=idea_number,
-                    title=idea['title'],
-                    concept=idea['description'],
-                    insight=idea['rationale'],  # Use rationale as insight
-                    formats=["Digital", "Social Media"]  # Default formats for v2
+                    title=idea["title"],
+                    concept=idea["description"],
+                    insight=idea["rationale"],  # Use rationale as insight
+                    formats=["Digital", "Social Media"],  # Default formats for v2
                 )
 
                 saved_concepts.append(concept)
 
-            logger.info(f"[LangGraph v2] Successfully generated and saved {len(saved_concepts)} ideas")
+            logger.info(
+                f"[LangGraph v2] Successfully generated and saved {len(saved_concepts)} ideas"
+            )
 
             # Return response in v1 format
             return IdeaGenerateResponse(
                 project_id=project_id,
                 ideas_generated=len(saved_concepts),
                 concepts=saved_concepts,
-                files_created=[f"ideas/{c.number:03d}.md" for c in saved_concepts]
+                files_created=[f"ideas/{c.number:03d}.md" for c in saved_concepts],
             )
 
         except Exception as e:
@@ -834,6 +768,7 @@ Insight: {idea.insight}
             if "Promedio" in line or "Overall" in line or "**Promedio" in line:
                 # Extract number
                 import re
+
                 match = re.search(r"(\d+\.?\d*)", line)
                 if match:
                     return float(match.group(1))

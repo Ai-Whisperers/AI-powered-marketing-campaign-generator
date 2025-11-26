@@ -134,12 +134,6 @@ class Settings(BaseSettings):
     debug: bool = Field(default=False, description="Debug mode")
     environment: str = Field(default="development", description="Environment name")
 
-    # Database (Env vars)
-    database_url: str = Field(
-        default="sqlite+aiosqlite:///./campaign_generator.db",
-        description="Database URL (PostgreSQL or SQLite)",
-    )
-
     # Redis (Env vars)
     redis_enabled: bool = Field(default=False, description="Enable Redis caching for LLM responses")
     redis_url: str = Field(
