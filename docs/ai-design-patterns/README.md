@@ -1,213 +1,187 @@
-# AI Agentic Design Patterns
+# Complete AI Agentic Design Patterns (20 Patterns)
 
-> Comprehensive guide to modern AI agent design patterns and their implementation in the Marketing Agent
+> Comprehensive guide based on Andrew Ng, LangChain, and Prompt Advisers research
 
-## 📚 Overview
+## 📚 Pattern Categories
 
-This directory contains detailed documentation of AI agentic design patterns, based on research from Andrew Ng, LangChain, LangGraph, and industry best practices.
+### 🎯 Core Execution Patterns (1-7)
 
-## 🎯 Core Patterns (Andrew Ng's Framework)
+1. [Prompt Chaining](./patterns/01-prompt-chaining.md) - Assembly-line steps
+2. [Routing](./patterns/02-routing.md) - Smart triage to specialists
+3. [Parallelization](./patterns/03-parallelization.md) - Split, normalize, merge
+4. [Reflection](./patterns/04-reflection.md) - Critic → revise → pass
+5. [Tool Use](./patterns/05-tool-use.md) - Discover, authorize, execute
+6. [Planning](./patterns/06-planning.md) - Milestones & dependencies
+7. [Multi-Agent](./patterns/07-multi-agent.md) - Manager + roles + memory
 
-### 1. [Reflection](./patterns/01-reflection.md)
+### 🧠 Intelligence Patterns (8-10)
 
-AI systems critique and refine their own outputs iteratively.
+8. [Memory Management](./patterns/08-memory.md) - Short/episodic/long-term
+9. [Learning & Adaptation](./patterns/09-learning.md) - Feedback loops
+10. [Goal Setting & Monitoring](./patterns/10-goals.md) - KPIs & drift detection
 
-- **Used in**: Critic Node
-- **Impact**: 48% → 95% accuracy improvement
+### 🛡️ Reliability Patterns (11-12)
 
-### 2. [Tool Use](./patterns/02-tool-use.md)
+11. [Exception Handling](./patterns/11-exceptions.md) - Classify, backoff, fallbacks
+12. [Human-in-the-Loop](./patterns/12-hitl.md) - Review cues & approvals
 
-LLMs interact with external tools, APIs, and resources.
+### 🔍 Data Patterns (13-14)
 
-- **Used in**: Research Service, Web Fetcher
-- **Impact**: Extended capabilities beyond text generation
+13. [Retrieval (RAG)](./patterns/13-rag.md) - Parse, chunk, embed, rerank
+14. [Inter-Agent Communication](./patterns/14-communication.md) - Protocols & IDs
 
-### 3. [Planning](./patterns/03-planning.md)
+### ⚡ Optimization Patterns (15-16)
 
-Breaking down complex tasks into manageable sub-tasks.
+15. [Resource-Aware Optimization](./patterns/15-optimization.md) - Cost/complexity routing
+16. [Reasoning Techniques](./patterns/16-reasoning.md) - CoT, ToT, debate
 
-- **Used in**: Two-Phase Ideation
-- **Impact**: Better task decomposition and execution
+### 🔒 Quality Patterns (17-19)
 
-### 4. [Multi-Agent Collaboration](./patterns/04-multi-agent.md)
+17. [Evaluation & Monitoring](./patterns/17-evaluation.md) - Golden sets, SLAs
+18. [Guardrails & Safety](./patterns/18-safety.md) - PII, injection, sandboxing
+19. [Prioritization](./patterns/19-prioritization.md) - Value × effort × urgency
 
-Multiple specialized agents working together.
+### 🚀 Advanced Patterns (20)
 
-- **Used in**: Research → Synthesis → Ideation → Critique workflow
-- **Impact**: Specialized expertise per task
+20. [Exploration & Discovery](./patterns/20-exploration.md) - Map space, cluster, probe
 
-## 🔄 Advanced Patterns
+## 📊 Implementation Status in Marketing Agent
 
-### 5. [ReAct (Reason + Act)](./patterns/05-react.md)
+| #   | Pattern               | Status | Location           | Priority |
+| --- | --------------------- | ------ | ------------------ | -------- |
+| 1   | Prompt Chaining       | ✅     | Research flow      | High     |
+| 2   | Routing               | 🟡     | Partial            | Medium   |
+| 3   | Parallelization       | ✅     | Batch video        | High     |
+| 4   | Reflection            | ✅     | Critic node        | High     |
+| 5   | Tool Use              | ✅     | Research service   | High     |
+| 6   | Planning              | ✅     | Two-phase ideation | High     |
+| 7   | Multi-Agent           | ✅     | Campaign graph     | High     |
+| 8   | Memory Management     | ✅     | Campaign memory    | Medium   |
+| 9   | Learning & Adaptation | ❌     | -                  | Low      |
+| 10  | Goal Setting          | ❌     | -                  | Medium   |
+| 11  | Exception Handling    | 🟡     | Partial            | High     |
+| 12  | Human-in-the-Loop     | ❌     | -                  | Medium   |
+| 13  | RAG                   | ✅     | FAISS memory       | Medium   |
+| 14  | Inter-Agent Comm      | ✅     | State sharing      | High     |
+| 15  | Resource Optimization | ✅     | Hybrid providers   | High     |
+| 16  | Reasoning             | 🟡     | Implicit           | Medium   |
+| 17  | Evaluation            | 🟡     | Scoring            | Medium   |
+| 18  | Guardrails            | ❌     | -                  | High     |
+| 19  | Prioritization        | ❌     | -                  | Low      |
+| 20  | Exploration           | ❌     | -                  | Low      |
 
-Interleaving reasoning with actions in a loop.
+**Legend**: ✅ Implemented | 🟡 Partial | ❌ Not Implemented
 
-- **Status**: Partially implemented in graph workflow
+## 🎓 Learning Path
 
-### 6. [Plan-and-Execute](./patterns/06-plan-execute.md)
+### Beginner (Start Here)
 
-Strategic planning followed by systematic execution.
+1. Prompt Chaining
+2. Tool Use
+3. Reflection
 
-- **Status**: Implemented in campaign generation
+### Intermediate
 
-### 7. [Prompt Chaining](./patterns/07-prompt-chaining.md)
+4. Planning
+5. Multi-Agent
+6. Memory Management
+7. RAG
 
-Sequential prompts building on previous outputs.
+### Advanced
 
-- **Status**: Used in research → synthesis flow
+8. Routing
+9. Resource Optimization
+10. Reasoning Techniques
 
-### 8. [Routing](./patterns/08-routing.md)
+### Expert
 
-Directing queries to appropriate specialized agents.
+11. Learning & Adaptation
+12. Inter-Agent Communication
+13. Exploration & Discovery
 
-- **Status**: Potential future enhancement
+## 📈 Impact Matrix
 
-### 9. [Parallelization](./patterns/09-parallelization.md)
+| Pattern         | Complexity | Impact    | ROI        |
+| --------------- | ---------- | --------- | ---------- |
+| Reflection      | Low        | Very High | ⭐⭐⭐⭐⭐ |
+| Tool Use        | Medium     | Very High | ⭐⭐⭐⭐⭐ |
+| Planning        | Medium     | High      | ⭐⭐⭐⭐   |
+| Multi-Agent     | High       | Very High | ⭐⭐⭐⭐⭐ |
+| Parallelization | Medium     | High      | ⭐⭐⭐⭐   |
+| Memory          | Medium     | Medium    | ⭐⭐⭐     |
+| RAG             | High       | High      | ⭐⭐⭐⭐   |
+| Guardrails      | Medium     | Very High | ⭐⭐⭐⭐⭐ |
 
-Concurrent execution of independent tasks.
+## 🚀 Quick Start Guide
 
-- **Status**: Implemented in batch video generation
+### 1. Start with Core Patterns
 
-### 10. [Self-Ask](./patterns/10-self-ask.md)
+```python
+# Reflection
+output = generate()
+critique = reflect(output)
+improved = regenerate(critique)
 
-Agent asks itself clarifying questions.
+# Tool Use
+result = use_tool("web_search", query)
 
-- **Status**: Not implemented
-
-### 11. [Tree-of-Thoughts](./patterns/11-tree-of-thoughts.md)
-
-Exploring multiple reasoning paths.
-
-- **Status**: Not implemented
-
-### 12. [Ensemble Decision](./patterns/12-ensemble.md)
-
-Combining multiple model outputs.
-
-- **Status**: Not implemented
-
-## 🧠 Memory Patterns
-
-### 13. [Episodic Memory](./patterns/13-episodic-memory.md)
-
-Storing and retrieving past experiences.
-
-- **Used in**: Campaign Memory (FAISS)
-
-### 14. [Semantic Memory](./patterns/14-semantic-memory.md)
-
-Long-term knowledge storage.
-
-- **Used in**: Research caching
-
-### 15. [Graph Memory](./patterns/15-graph-memory.md)
-
-World-model representation.
-
-- **Status**: Not implemented
-
-## 📊 Implementation Analysis
-
-### Current Architecture
-
+# Planning
+plan = decompose_task(goal)
+execute_plan(plan)
 ```
-Marketing Agent
-├── Research Node (Tool Use)
-├── Synthesis Node (Prompt Chaining)
-├── Ideation Node (Planning + Multi-Agent)
-│   ├── Phase 1: Base Concepts
-│   └── Phase 2: Strategic Enrichment
-├── Critic Node (Reflection)
-└── Memory (Episodic)
+
+### 2. Add Intelligence
+
+```python
+# Memory
+memory.store(successful_output)
+similar = memory.retrieve(query)
+
+# Learning
+feedback = collect_feedback()
+update_prompts(feedback)
 ```
 
-### Pattern Usage Matrix
+### 3. Ensure Reliability
 
-| Pattern         | Implemented | Location            | Impact |
-| --------------- | ----------- | ------------------- | ------ |
-| Reflection      | ✅          | `critic_node`       | High   |
-| Tool Use        | ✅          | `research_service`  | High   |
-| Planning        | ✅          | `ideation_node`     | High   |
-| Multi-Agent     | ✅          | `campaign_graph`    | High   |
-| ReAct           | 🟡          | Partial             | Medium |
-| Prompt Chaining | ✅          | Research flow       | Medium |
-| Parallelization | ✅          | `batch_video_agent` | Medium |
-| Episodic Memory | ✅          | `campaign_memory`   | Low    |
-| Plan-Execute    | ✅          | Overall workflow    | High   |
+```python
+# Exception Handling
+try:
+    result = agent.execute()
+except AgentError as e:
+    result = fallback_strategy(e)
 
-**Legend**: ✅ Fully Implemented | 🟡 Partially Implemented | ❌ Not Implemented
+# Guardrails
+if contains_pii(output):
+    output = redact_pii(output)
+```
 
-## 🎓 Learning Resources
+## 📚 Resources
 
-- [Andrew Ng on Agentic Workflows](https://www.deeplearning.ai/the-batch/how-agents-can-improve-llm-performance/)
+### Official Sources
+
+- [Andrew Ng - Agentic Workflows](https://www.deeplearning.ai/the-batch/)
 - [LangGraph Documentation](https://langchain-ai.github.io/langgraph/)
-- [ReAct Paper](https://arxiv.org/abs/2210.03629)
-- [Multi-Agent Systems](https://arxiv.org/abs/2308.08155)
+- [Prompt Advisers Video](https://www.youtube.com/watch?v=e2zIr_2JMbE)
+- [GitHub Repo](https://github.com/promptadvisers/agentic-design-patterns-docs)
 
-## 🔍 Pattern Selection Guide
+### Research Papers
 
-### When to Use Each Pattern
+- ReAct (Yao et al., 2022)
+- AutoGen (Microsoft, 2023)
+- MetaGPT (2023)
+- Tree-of-Thoughts (2023)
 
-**Reflection**
+## 🎯 Next Steps
 
-- ✅ When output quality is critical
-- ✅ When iterative improvement is possible
-- ❌ When latency is critical
-
-**Tool Use**
-
-- ✅ When external data is needed
-- ✅ When specialized computation required
-- ❌ When tools are unreliable
-
-**Planning**
-
-- ✅ For complex, multi-step tasks
-- ✅ When task decomposition helps
-- ❌ For simple, single-step tasks
-
-**Multi-Agent**
-
-- ✅ When specialized expertise needed
-- ✅ For parallel task execution
-- ❌ When coordination overhead is high
-
-## 📈 Performance Impact
-
-Based on Andrew Ng's research and our implementation:
-
-| Metric          | Zero-Shot | With Agentic Patterns | Improvement |
-| --------------- | --------- | --------------------- | ----------- |
-| Accuracy        | 48%       | 95%                   | +97%        |
-| Quality Score   | 6.5/10    | 8.5/10                | +31%        |
-| Task Completion | 70%       | 95%                   | +36%        |
-
-## 🚀 Future Enhancements
-
-### Planned Patterns
-
-1. **Tree-of-Thoughts**: Explore multiple ideation paths
-2. **Ensemble Decision**: Combine multiple AI providers
-3. **Graph Memory**: Build knowledge graphs from campaigns
-4. **Advanced Routing**: Dynamic agent selection
-
-### Research Areas
-
-- Self-healing agents
-- Adaptive planning
-- Meta-learning from past campaigns
-- Human-in-the-loop patterns
-
-## 📝 Contributing
-
-When adding new patterns:
-
-1. Create pattern file in `patterns/`
-2. Update this index
-3. Add implementation examples
-4. Document performance impact
+1. **Review Current Implementation**: See `ARCHITECTURE_ANALYSIS.md`
+2. **Identify Gaps**: Check implementation status table
+3. **Prioritize Patterns**: Focus on high-impact, not-implemented
+4. **Implement Incrementally**: One pattern at a time
+5. **Measure Impact**: Track metrics before/after
 
 ---
 
 **Last Updated**: 2024-11-26  
+**Sources**: Andrew Ng, Prompt Advisers, LangChain  
 **Maintained by**: Ai-Whisperers Team
