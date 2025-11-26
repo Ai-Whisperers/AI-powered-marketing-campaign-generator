@@ -10,23 +10,23 @@ from pathlib import Path
 from typing import Any
 
 from ..config import get_settings
+from ..logging_config import get_logger
 from ..models import (
+    CulturalValidation,
     IdeaConcept,
     IdeaExpanded,
+    IdeaExpandResponse,
+    IdeaGenerateResponse,
+    IdeaScoreResponse,
     IdeaScores,
     IdeaSummary,
-    IdeaGenerateResponse,
-    IdeaExpandResponse,
-    IdeaScoreResponse,
     QualityValidation,
-    CulturalValidation
 )
-from ..logging_config import get_logger
+from ..utils.similarity import check_idea_similarity
 from .ai_client import get_ai_manager, get_prompt_loader
 from .file_operations import get_file_service
-from .template_renderer import get_template_renderer
 from .research_service import get_research_service
-from ..utils.similarity import check_idea_similarity
+from .template_renderer import get_template_renderer
 
 logger = get_logger("ideas_service")
 settings = get_settings()
@@ -129,10 +129,10 @@ class IdeasService:
         files_created = []
         # Expand and save each idea
         files_created = []
-        
+
         # Use semaphore to limit concurrency and avoid rate limits
         sem = asyncio.Semaphore(5)  # Allow 5 concurrent expansions
-        
+
         async def expand_and_save(concept):
             async with sem:
                 try:
@@ -193,14 +193,15 @@ class IdeasService:
                     )
 
                     file_path = await self.files.save_idea(project_id, expanded.number, rendered)
-                    
+
                     # Save to database if repository available
                     if self.idea_repository:
                         try:
-                            from ..database.models import Idea
-                            from datetime import datetime
                             import json
-                            
+                            from datetime import datetime
+
+                            from ..database.models import Idea
+
                             db_idea = Idea(
                                 project_id=project_id,
                                 number=expanded.number,
@@ -284,26 +285,26 @@ RESEARCH SUMMARY:
         )
 
         concepts = []
-        
+
         # Convert existing ideas to dict format for similarity check
         existing_dicts = [{"title": t} for t in existing_ideas]
-        
+
         for idea in response.get("ideas", []):
             title = idea.get("title") or idea.get("name") or "Untitled"
             logger.info(f"Processing idea: {title}")
-            
+
             # Check for similarity
             is_similar, score, similar_to = check_idea_similarity(
-                idea, 
-                existing_dicts, 
+                idea,
+                existing_dicts,
                 threshold=0.6  # Slightly higher threshold for batch generation
             )
-            
+
             if is_similar:
                 logger.info(f"Skipping similar idea: '{title}' (similar to '{similar_to}', score: {score:.2f})")
                 continue
-            
-            logger.info(f"Adding idea: {title}")    
+
+            logger.info(f"Adding idea: {title}")
             concepts.append(IdeaConcept(
                 number=0,  # Will be assigned later
                 title=title,
@@ -311,7 +312,7 @@ RESEARCH SUMMARY:
                 insight=idea.get("insight", ""),
                 formats=idea.get("formats", [])
             ))
-            
+
             # Add to existing dicts so we don't generate duplicates within the same batch
             existing_dicts.append(idea)
 
@@ -728,9 +729,9 @@ Insight: {idea.insight}
         Returns:
             Response with generated concepts
         """
-        from ..graphs import CampaignGraphRunner
-        import os
         from datetime import datetime
+
+        from ..graphs import CampaignGraphRunner
 
         logger.info(f"[LangGraph v2] Generating {num_ideas} ideas for {project_id}")
 

@@ -202,7 +202,7 @@ class FileCache:
             return None
 
         try:
-            with open(cache_path, "r", encoding="utf-8") as f:
+            with open(cache_path, encoding="utf-8") as f:
                 data = json.load(f)
 
             # Check expiration
@@ -217,7 +217,7 @@ class FileCache:
             logger.debug(f"File cache hit: {key[:16]}...")
             return data.get("value")
 
-        except (json.JSONDecodeError, IOError) as e:
+        except (OSError, json.JSONDecodeError) as e:
             logger.warning(f"Failed to read cache file: {e}")
             return None
 
@@ -245,7 +245,7 @@ class FileCache:
             with open(cache_path, "w", encoding="utf-8") as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
             logger.debug(f"File cache set: {key[:16]}...")
-        except IOError as e:
+        except OSError as e:
             logger.error(f"Failed to write cache file: {e}")
 
     def delete(self, key: str) -> bool:

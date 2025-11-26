@@ -1,12 +1,11 @@
 
-import sys
 import os
+import sys
 
 # Add code directory to path
 sys.path.append(os.path.join(os.getcwd(), "code"))
 
 # Apply patches
-import patch_langchain
 
 print("Attempting to import gpt_researcher...")
 try:
@@ -19,6 +18,7 @@ except Exception as e:
 
 print("\nAttempting to run simple research...")
 import asyncio
+
 
 async def main():
     try:

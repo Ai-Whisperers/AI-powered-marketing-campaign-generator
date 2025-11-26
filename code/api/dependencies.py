@@ -3,10 +3,11 @@ Dependency functions for FastAPI routes.
 """
 
 from typing import Annotated
+
 from fastapi import Depends, Header, HTTPException
 
-from .container import get_container
 from .config import get_settings
+from .container import get_container
 
 settings = get_settings()
 

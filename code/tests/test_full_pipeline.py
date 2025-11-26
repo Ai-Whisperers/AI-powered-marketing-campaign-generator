@@ -6,11 +6,12 @@ Runs all steps: create project, parse brief, research, ideas, export.
 """
 
 import asyncio
-import httpx
 import json
 import sys
 from datetime import datetime
 from pathlib import Path
+
+import httpx
 
 # API Base URL
 API_URL = "http://localhost:8000"
@@ -23,7 +24,7 @@ def load_test_data(filename: str) -> dict:
     """Load test data from JSON file."""
     filepath = DATA_DIR / filename
     if filepath.exists():
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, encoding='utf-8') as f:
             return json.load(f)
     else:
         print(f"WARNING: Test data file not found: {filepath}")
@@ -238,13 +239,13 @@ async def test_pipeline():
         print(f"Total ideas scored: {score_result.get('total_ideas', 0)}")
 
         tier_dist = score_result.get('tier_distribution', {})
-        print(f"Tier distribution:")
+        print("Tier distribution:")
         for tier, count in sorted(tier_dist.items()):
             print(f"  {tier}: {count} ideas")
 
         top_ideas = score_result.get('top_ideas', [])
         if top_ideas:
-            print(f"\nTop 5 Ideas:")
+            print("\nTop 5 Ideas:")
             for i, idea in enumerate(top_ideas[:5], 1):
                 print(f"  {i}. [{idea.get('overall_score', 0):.1f}] {idea.get('title', 'N/A')[:50]}...")
         print()
@@ -267,7 +268,7 @@ async def test_pipeline():
 
         weak_dims = gaps_result.get('weak_dimensions', [])
         if weak_dims:
-            print(f"Weak dimensions:")
+            print("Weak dimensions:")
             for dim in weak_dims[:3]:
                 avg_score = dim.get('average_score', 0)
                 try:
@@ -357,7 +358,7 @@ async def test_pipeline():
         print(f"Project ID: {project_id}")
         print(f"Total Ideas: {score_result.get('total_ideas', 0)}")
         print(f"Top Score: {top_ideas[0].get('overall_score', 0) if top_ideas else 0:.1f}")
-        print(f"Exports: PDF + PPTX")
+        print("Exports: PDF + PPTX")
         print()
         print(f"View exports at: {API_URL}/projects/{project_id}/export")
         print(f"Completed: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")

@@ -4,10 +4,10 @@ Brief parsing routes.
 
 from fastapi import APIRouter, HTTPException
 
-from ..models import BriefUpload, BriefParseResponse
-from ..dependencies import FileServiceDep, BriefParserDep, APIKeyDep
-from ..exceptions import ProjectNotFoundError, FileNotFoundError
+from ..dependencies import APIKeyDep, BriefParserDep, FileServiceDep
+from ..exceptions import FileNotFoundError, ProjectNotFoundError
 from ..logging_config import get_logger
+from ..models import BriefParseResponse, BriefUpload
 
 router = APIRouter(prefix="/projects/{project_id}/brief", tags=["brief"])
 logger = get_logger("routes.brief")

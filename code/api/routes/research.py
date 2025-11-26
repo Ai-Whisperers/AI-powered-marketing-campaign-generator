@@ -3,18 +3,18 @@ Research management routes.
 """
 
 from fastapi import APIRouter, HTTPException
-
 from pydantic import BaseModel, Field
 
-from ..models import ResearchAddRequest, ResearchAddResponse, SynthesizeRequest, SynthesizeResponse, ResearchSource
-from ..dependencies import (
-    FileServiceDep,
-    ResearchServiceDep,
-    SynthesisServiceDep,
-    APIKeyDep
-)
-from ..exceptions import ProjectNotFoundError, FileNotFoundError, SourceFetchError
+from ..dependencies import APIKeyDep, FileServiceDep, ResearchServiceDep, SynthesisServiceDep
+from ..exceptions import FileNotFoundError, ProjectNotFoundError, SourceFetchError
 from ..logging_config import get_logger
+from ..models import (
+    ResearchAddRequest,
+    ResearchAddResponse,
+    ResearchSource,
+    SynthesizeRequest,
+    SynthesizeResponse,
+)
 
 
 class AutoResearchRequest(BaseModel):
@@ -263,7 +263,7 @@ async def auto_fetch_research(project_id: str, request: AutoResearchRequest = No
             "search_results": len(search_results),
             "error": str(e)
         }
-    except (IOError, OSError) as e:
+    except OSError as e:
         logger.error(f"IO error during research fetching: {e}")
         return {
             "project_id": project_id,
@@ -307,9 +307,9 @@ async def run_research_agent(project_id: str, request: AgentResearchRequest):
     # Ensure we can import the agent
     sys.path.append(str(Path(__file__).parent.parent.parent))
     from api.agents.research_agent import create_research_graph
-    
+
     agent = create_research_graph()
-    
+
     initial_state = {
         "project_id": project_id,
         "topic": request.topic,
@@ -320,21 +320,21 @@ async def run_research_agent(project_id: str, request: AgentResearchRequest):
         "iterations": 0,
         "is_complete": False
     }
-    
+
     logger.info(f"Starting Research Agent for project {project_id} on topic: {request.topic}")
-    
+
     final_state = await agent.ainvoke(initial_state)
-    
+
     # Save findings to a file
     files = get_file_service()
     content = f"# Agent Research: {request.topic}\n\n"
     content += f"**Subtopics:** {', '.join(request.subtopics)}\n\n"
     content += "## Findings\n\n"
     content += "\n\n".join(final_state["findings"])
-    
+
     filename = f"research/agent-{request.topic.lower().replace(' ', '-')}.md"
     await files.write_file(project_id, filename, content)
-    
+
     return {
         "project_id": project_id,
         "status": "complete",

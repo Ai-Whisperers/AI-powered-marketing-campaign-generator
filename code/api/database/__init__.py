@@ -2,8 +2,8 @@
 Database package for SQLAlchemy models and session management.
 """
 
-from .engine import get_session, engine
-from .models import Base, Project, Idea, ResearchItem
+from .engine import engine, get_session
+from .models import Base, Idea, Project, ResearchItem
 
 __all__ = [
     "get_session",

@@ -3,17 +3,16 @@ Unit tests for Pydantic models and validation.
 """
 
 import pytest
-from pydantic import ValidationError
-
 from api.models import (
-    ProjectCreate,
     BriefUpload,
-    ResearchSource,
-    ResearchAddRequest,
     ExportRequest,
     IdeaGenerateRequest,
-    IdeaScores
+    IdeaScores,
+    ProjectCreate,
+    ResearchAddRequest,
+    ResearchSource,
 )
+from pydantic import ValidationError
 
 
 class TestProjectCreate:

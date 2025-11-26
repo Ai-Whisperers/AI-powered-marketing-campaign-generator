@@ -5,9 +5,9 @@ Provides intelligent analysis of research data, insights extraction,
 and strategic recommendations for marketing campaigns.
 """
 
+from datetime import datetime
 from pathlib import Path
 from typing import Any
-from datetime import datetime
 
 from ..config import get_settings
 from ..logging_config import get_logger
@@ -685,19 +685,19 @@ class AnalyticsService:
     async def _analyze_research_files(self, project_path: Path) -> dict[str, Any]:
         """Analyze research files and categorize them."""
         research_dirs = list(project_path.glob("investigacion-*"))
-        
+
         stats = {
             "total_files": 0,
             "by_category": {},
             "file_list": []
         }
-        
+
         for research_dir in research_dirs:
             if research_dir.is_dir():
                 for research_file in research_dir.glob("*.md"):
                     stats["total_files"] += 1
                     stats["file_list"].append(research_file.name)
-                    
+
                     # Categorize by filename keywords
                     filename_lower = research_file.stem.lower()
                     if any(word in filename_lower for word in ["competitor", "competition", "rival"]):
@@ -712,9 +712,9 @@ class AnalyticsService:
                         category = "cultural_insights"
                     else:
                         category = "general"
-                    
+
                     stats["by_category"][category] = stats["by_category"].get(category, 0) + 1
-        
+
         return stats
 
     # =========================================================================

@@ -2,8 +2,9 @@
 """
 Quick script to create Ueno Bank project via API
 """
-import requests
 import json
+
+import requests
 
 # API configuration
 API_URL = "http://localhost:8000"
@@ -32,11 +33,11 @@ print(json.dumps(response.json(), indent=2))
 if response.status_code == 201:
     project = response.json()
     project_id = project["id"]
-    print(f"\n✓ Project created successfully!")
+    print("\n✓ Project created successfully!")
     print(f"Project ID: {project_id}")
 
     # Now upload the brief
-    with open("briefs-originales/UENO_BANK_BRIEF.md", "r", encoding="utf-8") as f:
+    with open("briefs-originales/UENO_BANK_BRIEF.md", encoding="utf-8") as f:
         brief_content = f.read()
 
     print(f"\n📄 Uploading brief ({len(brief_content)} chars)...")

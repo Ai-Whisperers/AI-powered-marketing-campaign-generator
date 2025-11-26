@@ -171,39 +171,92 @@ async def synthesis_node(state: CampaignState):
 
 
 async def ideation_node(state: CampaignState):
-    """Generate initial campaign concepts."""
-    logger.info("Generating concepts...")
+    """Generate campaign concepts using two-phase approach for Ollama compatibility."""
+    logger.info("Generating concepts (two-phase approach)...")
     ai = get_ai_manager()
 
     num_ideas = state.get("num_ideas", 5)
     summary = state["research_summary"]
 
-    system_prompt = "You are a Creative Director. Generate innovative campaign concepts."
-    user_prompt = f"""
-    Based on these insights:
-    {summary}
-    
-    Generate {num_ideas} distinct campaign concepts.
-    Return JSON with a list of objects, each having 'title', 'description', 'rationale'.
-    """
+    # PHASE 1: Generate Base Concepts (6 fields)
+    logger.info(f"Phase 1: Generating {num_ideas} base concepts...")
+
+    phase1_system = "You are a Creative Director. Return ONLY a JSON array."
+    phase1_user = f"""Based on: {summary[:3000]}
+
+Generate {num_ideas} campaign concepts for Gen Z Paraguay.
+Return JSON array with: title, description, rationale, target_audience, channels, kpis.
+
+Example: [{{"title": "...", "description": "...", "rationale": "...", "target_audience": "...", "channels": [...], "kpis": [...]}}]
+"""
 
     try:
-        response = await ai.generate_json(user_prompt, system=system_prompt, temperature=0.8)
-        logger.info(
-            f"Ideation raw response keys: {response.keys() if isinstance(response, dict) else 'Not a dict'}"
+        # Phase 1 - Force OpenAI for reliable JSON generation
+        phase1_response = await ai.generate_json(
+            phase1_user,
+            system=phase1_system,
+            temperature=0.8,
+            use_fallback=True,  # Force OpenAI for structured output
         )
 
-        concepts = response.get("ideas", [])
-        if not concepts:
-            concepts = response.get("campaign_concepts", [])
-        if not concepts:
-            concepts = response.get("campaigns", [])
+        if isinstance(phase1_response, list):
+            base_concepts = phase1_response
+        elif isinstance(phase1_response, dict):
+            base_concepts = phase1_response.get("ideas", phase1_response.get("concepts", []))
+        else:
+            base_concepts = []
 
-        if not concepts and isinstance(response, list):
-            concepts = response
+        logger.info(f"Phase 1: {len(base_concepts)} concepts generated")
 
-        logger.info(f"Generated {len(concepts)} concepts")
-        return {"concepts": concepts}
+        if not base_concepts:
+            return {"concepts": [], "errors": ["No concepts in Phase 1"]}
+
+        # PHASE 2: Enrich Each Concept
+        logger.info(f"Phase 2: Enriching {len(base_concepts)} concepts...")
+
+        enriched_concepts = []
+        for i, concept in enumerate(base_concepts):
+            logger.info(f"Enriching {i+1}/{len(base_concepts)}: {concept.get('title', 'Untitled')}")
+
+            phase2_user = f"""Campaign: "{concept.get('title', '')}"
+Description: {concept.get('description', '')}
+
+Add as JSON: budget_tier (Low/Medium/High), timeline (1-3/3-6/6+ months), key_message, call_to_action, sustainability_component, risks (array), success_factors (array).
+"""
+
+            try:
+                phase2_response = await ai.generate_json(
+                    phase2_user, system="Strategic planner. Return JSON.", temperature=0.6
+                )
+
+                if isinstance(phase2_response, dict):
+                    concept.update(phase2_response)
+                else:
+                    # Defaults
+                    concept.setdefault("budget_tier", "Medium")
+                    concept.setdefault("timeline", "3-6 months")
+                    concept.setdefault("key_message", "TBD")
+                    concept.setdefault("call_to_action", "TBD")
+                    concept.setdefault("sustainability_component", "TBD")
+                    concept.setdefault("risks", ["TBD"])
+                    concept.setdefault("success_factors", ["TBD"])
+
+            except Exception as e:
+                logger.error(f"Phase 2 failed for {concept.get('title')}: {e}")
+                # Add defaults
+                concept.setdefault("budget_tier", "Medium")
+                concept.setdefault("timeline", "3-6 months")
+                concept.setdefault("key_message", "TBD")
+                concept.setdefault("call_to_action", "TBD")
+                concept.setdefault("sustainability_component", "TBD")
+                concept.setdefault("risks", ["TBD"])
+                concept.setdefault("success_factors", ["TBD"])
+
+            enriched_concepts.append(concept)
+
+        logger.info(f"Two-phase complete: {len(enriched_concepts)} enriched concepts")
+        return {"concepts": enriched_concepts}
+
     except Exception as e:
         logger.error(f"Ideation failed: {e}")
         import traceback
@@ -236,11 +289,21 @@ async def critic_node(state: CampaignState):
 
         try:
             response = await ai.generate_json(prompt, temperature=0.2)
-            critiques.append(response.get("critique", "No critique"))
+
+            # Handle both list and dict responses
+            if isinstance(response, list):
+                response = response[0] if response else {}
+
+            critique_text = (
+                response.get("critique", "No critique")
+                if isinstance(response, dict)
+                else "No critique"
+            )
+            critiques.append(critique_text)
 
             # Enrich concept with scores
-            concept["scores"] = response.get("scores", {})
-            concept["critique"] = response.get("critique", "")
+            concept["scores"] = response.get("scores", {}) if isinstance(response, dict) else {}
+            concept["critique"] = critique_text
 
             # Calculate overall
             scores = concept["scores"]

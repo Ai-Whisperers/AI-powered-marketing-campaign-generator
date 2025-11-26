@@ -6,11 +6,11 @@ Provides semantic caching for expensive LLM calls using Redis and langchain-redi
 """
 
 import logging
-from typing import Optional
-from langchain_core.caches import BaseCache
-from langchain_redis import RedisSemanticCache, RedisCache
-from langchain_openai import OpenAIEmbeddings
+
 import redis
+from langchain_core.caches import BaseCache
+from langchain_openai import OpenAIEmbeddings
+from langchain_redis import RedisCache, RedisSemanticCache
 
 from ..config import get_settings
 
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 settings = get_settings()
 
 
-def get_redis_cache() -> Optional[BaseCache]:
+def get_redis_cache() -> BaseCache | None:
     """
     Get configured Redis cache for LangChain.
 
@@ -52,7 +52,7 @@ def get_redis_cache() -> Optional[BaseCache]:
         return None
 
 
-def get_simple_redis_cache() -> Optional[BaseCache]:
+def get_simple_redis_cache() -> BaseCache | None:
     """
     Get simple Redis cache (exact match only, faster but less flexible).
 

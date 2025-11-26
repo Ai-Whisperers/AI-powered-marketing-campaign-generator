@@ -2,11 +2,9 @@
 Pydantic models for API request/response validation.
 """
 
-from datetime import datetime
 from typing import Any
 
 from pydantic import BaseModel, Field, HttpUrl
-
 
 # =============================================================================
 # Project Models

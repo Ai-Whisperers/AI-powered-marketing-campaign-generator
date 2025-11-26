@@ -2,13 +2,13 @@
 API Routes Package
 """
 
-from .projects import router as projects_router
-from .brief import router as brief_router
-from .research import router as research_router
-from .ideas import router as ideas_router
-from .export import router as export_router
-from .iteration import router as iteration_router
 from .analytics import router as analytics_router
+from .brief import router as brief_router
+from .export import router as export_router
+from .ideas import router as ideas_router
+from .iteration import router as iteration_router
+from .projects import router as projects_router
+from .research import router as research_router
 
 __all__ = [
     "projects_router",

@@ -6,27 +6,26 @@ Generates PDF and PowerPoint exports of campaign projects.
 
 import io
 from datetime import datetime
-from pathlib import Path
 from typing import Any
 
+from pptx import Presentation
+from pptx.enum.text import PP_ALIGN
+from pptx.util import Inches, Pt
 from reportlab.lib import colors
-from reportlab.lib.pagesizes import letter, A4
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.platypus import (
-    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle,
-    PageBreak, Image
+    PageBreak,
+    Paragraph,
+    SimpleDocTemplate,
+    Spacer,
 )
-from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
 
-from pptx import Presentation
-from pptx.util import Inches, Pt
-from pptx.dml.color import RGBColor
-from pptx.enum.text import PP_ALIGN
-
-from ..models import ExportResponse
 from ..exceptions import PDFGenerationError, PowerPointGenerationError
 from ..logging_config import get_logger
+from ..models import ExportResponse
 from .file_operations import get_file_service
 
 logger = get_logger("export_service")
@@ -750,11 +749,11 @@ class ExportService:
     
     This is a wrapper class for dependency injection.
     """
-    
+
     def __init__(self):
         self.pdf = PDFExportService()
         self.pptx = PowerPointExportService()
-    
+
     def export_pdf(
         self,
         project_id: str,
@@ -769,7 +768,7 @@ class ExportService:
             include_all_ideas,
             top_ideas_count
         )
-    
+
     def export_powerpoint(
         self,
         project_id: str,

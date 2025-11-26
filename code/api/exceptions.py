@@ -5,7 +5,7 @@ All application-specific exceptions inherit from CampaignGeneratorError
 for consistent error handling throughout the system.
 """
 
-from typing import Any, Optional
+from typing import Any
 
 
 class CampaignGeneratorError(Exception):
@@ -15,7 +15,7 @@ class CampaignGeneratorError(Exception):
         self,
         message: str,
         error_code: str = "UNKNOWN_ERROR",
-        details: Optional[dict[str, Any]] = None
+        details: dict[str, Any] | None = None
     ):
         self.message = message
         self.error_code = error_code
@@ -38,7 +38,7 @@ class CampaignGeneratorError(Exception):
 class ConfigurationError(CampaignGeneratorError):
     """Raised when there's an issue with configuration."""
 
-    def __init__(self, message: str, details: Optional[dict] = None):
+    def __init__(self, message: str, details: dict | None = None):
         super().__init__(
             message=message,
             error_code="CONFIGURATION_ERROR",
@@ -68,7 +68,7 @@ class AIProviderError(CampaignGeneratorError):
         message: str,
         provider: str,
         error_code: str = "AI_PROVIDER_ERROR",
-        details: Optional[dict] = None
+        details: dict | None = None
     ):
         details = details or {}
         details["provider"] = provider
@@ -82,7 +82,7 @@ class AIProviderError(CampaignGeneratorError):
 class AIRateLimitError(AIProviderError):
     """Raised when AI provider rate limit is exceeded."""
 
-    def __init__(self, provider: str, retry_after: Optional[int] = None):
+    def __init__(self, provider: str, retry_after: int | None = None):
         details = {}
         if retry_after:
             details["retry_after_seconds"] = retry_after

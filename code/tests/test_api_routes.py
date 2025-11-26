@@ -2,11 +2,10 @@
 Integration tests for API routes.
 """
 
-import pytest
-from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock
 
+import pytest
 from api.main import app
+from fastapi.testclient import TestClient
 
 
 @pytest.fixture

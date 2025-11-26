@@ -3,7 +3,7 @@ LLM factory for creating LangChain-compatible LLM instances.
 """
 
 import logging
-from typing import Optional
+
 from langchain_anthropic import ChatAnthropic
 from langchain_openai import ChatOpenAI
 
@@ -16,7 +16,7 @@ settings = get_settings()
 def get_llm(
     provider: str = "anthropic",
     temperature: float = 0.7,
-    model: Optional[str] = None
+    model: str | None = None
 ):
     """
     Get a LangChain-compatible LLM instance.

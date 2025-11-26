@@ -10,20 +10,19 @@ It mocks removed modules and redirects imports to their new locations.
 Must be imported BEFORE any other langchain or gpt-researcher imports.
 """
 
+import logging
 import sys
 import types
-import warnings
-import logging
 
 logger = logging.getLogger("patch_langchain")
 
 def apply_patches():
     """Apply all langchain compatibility patches."""
-    
+
     # Suppress Pydantic V2 warnings from langchain
     # Suppress Pydantic V2 warnings from langchain - ONLY specific ones if needed
     # warnings.filterwarnings("ignore", category=UserWarning, module="langchain")
-    
+
     # 1. Patch langchain.docstore
     if "langchain.docstore" not in sys.modules:
         try:
@@ -75,13 +74,12 @@ def apply_patches():
     # 5. Patch langchain.schema
     if "langchain.schema" not in sys.modules:
         try:
-            from langchain_core import documents
-            from langchain_core import retrievers
+            from langchain_core import documents, retrievers
             schema = types.ModuleType("langchain.schema")
-            schema.__path__ = [] 
+            schema.__path__ = []
             schema.Document = documents.Document
             sys.modules["langchain.schema"] = schema
-            
+
             schema_retriever = types.ModuleType("langchain.schema.retriever")
             schema_retriever.BaseRetriever = retrievers.BaseRetriever
             sys.modules["langchain.schema.retriever"] = schema_retriever
@@ -94,7 +92,7 @@ def apply_patches():
     try:
         # Ensure langchain package is loaded
         import langchain
-        
+
         # Create retrievers module if it doesn't exist or is empty
         if "langchain.retrievers" not in sys.modules:
             retrievers_module = types.ModuleType("langchain.retrievers")
@@ -102,21 +100,23 @@ def apply_patches():
             sys.modules["langchain.retrievers"] = retrievers_module
         else:
             retrievers_module = sys.modules["langchain.retrievers"]
-        
+
         # Import necessary classes from new locations
         # ContextualCompressionRetriever moved to langchain.retrievers.contextual_compression
         # But in 0.3 it might be in langchain.retrievers directly or langchain_community
-        
+
         # Try to find the class
         ContextualCompressionRetriever = None
         try:
             from langchain.retrievers import ContextualCompressionRetriever
         except ImportError:
             try:
-                from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
+                from langchain.retrievers.contextual_compression import (
+                    ContextualCompressionRetriever,
+                )
             except ImportError:
                 pass
-        
+
         if ContextualCompressionRetriever:
              retrievers_module.ContextualCompressionRetriever = ContextualCompressionRetriever
         else:
@@ -127,17 +127,19 @@ def apply_patches():
 
         # Also patch document_compressors
         document_compressors = types.ModuleType("langchain.retrievers.document_compressors")
-        
+
         # Try to find DocumentCompressorPipeline
         DocumentCompressorPipeline = None
         try:
             from langchain.retrievers.document_compressors import DocumentCompressorPipeline
         except ImportError:
             try:
-                from langchain_community.retrievers.document_compressors import DocumentCompressorPipeline
+                from langchain_community.retrievers.document_compressors import (
+                    DocumentCompressorPipeline,
+                )
             except ImportError:
                 pass
-                
+
         if DocumentCompressorPipeline:
             document_compressors.DocumentCompressorPipeline = DocumentCompressorPipeline
         else:
@@ -200,15 +202,15 @@ def apply_patches():
                 def from_llm(cls, llm):
                     return cls()
             document_compressors.LLMChainFilter = MockLLMChainFilter
-            
+
         sys.modules["langchain.retrievers.document_compressors"] = document_compressors
-        
+
         # Inject into langchain package
         langchain.retrievers = retrievers_module
-        
+
         # logger.info("Patched langchain.retrievers")
-        
-    except ImportError as e:
+
+    except ImportError:
         # Fallback if imports fail
         pass
     except Exception as e:

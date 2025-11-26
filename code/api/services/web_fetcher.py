@@ -11,7 +11,7 @@ from urllib.parse import urlparse
 import httpx
 from bs4 import BeautifulSoup
 
-from ..exceptions import SourceFetchError, ContentExtractionError
+from ..exceptions import ContentExtractionError, SourceFetchError
 from ..logging_config import get_logger
 
 logger = get_logger("web_fetcher")

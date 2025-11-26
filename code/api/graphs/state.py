@@ -2,9 +2,9 @@
 State models for LangGraph workflows.
 """
 
-from typing import TypedDict, Annotated
-from datetime import datetime
 import operator
+from datetime import datetime
+from typing import Annotated, TypedDict
 
 
 class CampaignState(TypedDict):

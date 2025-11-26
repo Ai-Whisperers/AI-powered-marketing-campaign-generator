@@ -13,7 +13,7 @@ from typing import Any
 import aiofiles
 import yaml
 
-from ..config import get_settings, get_project_config
+from ..config import get_project_config, get_settings
 from ..exceptions import FileNotFoundError, FileWriteError, ProjectNotFoundError
 from ..logging_config import get_logger
 
@@ -179,7 +179,7 @@ class FileOperationsService:
             if item.is_dir():
                 metadata_path = item / "project.yaml"
                 if metadata_path.exists():
-                    with open(metadata_path, "r", encoding="utf-8") as f:
+                    with open(metadata_path, encoding="utf-8") as f:
                         metadata = yaml.safe_load(f)
                         projects.append(metadata)
 
@@ -201,7 +201,7 @@ class FileOperationsService:
         project_dir = self.get_project_path(project_id)
         metadata_path = project_dir / "project.yaml"
 
-        with open(metadata_path, "r", encoding="utf-8") as f:
+        with open(metadata_path, encoding="utf-8") as f:
             return yaml.safe_load(f)
 
     def update_project_metadata(self, project_id: str, updates: dict[str, Any]):
@@ -216,7 +216,7 @@ class FileOperationsService:
         metadata_path = project_dir / "project.yaml"
 
         # Load existing metadata
-        with open(metadata_path, "r", encoding="utf-8") as f:
+        with open(metadata_path, encoding="utf-8") as f:
             metadata = yaml.safe_load(f)
 
         # Update fields
@@ -295,7 +295,7 @@ class FileOperationsService:
         if not file_path.exists():
             raise FileNotFoundError(str(file_path))
 
-        async with aiofiles.open(file_path, "r", encoding="utf-8") as f:
+        async with aiofiles.open(file_path, encoding="utf-8") as f:
             return await f.read()
 
     def list_files(
@@ -323,7 +323,7 @@ class FileOperationsService:
             logger.info(f"Directory contents: {[str(p.name) for p in search_dir.iterdir()]}")
 
         import fnmatch
-        
+
         files = []
         if search_dir.exists():
             for file_path in search_dir.iterdir():

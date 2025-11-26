@@ -6,12 +6,12 @@ Uses DuckDuckGo as a free alternative to Google Custom Search.
 """
 
 import asyncio
-import aiohttp
-from typing import Any
 from urllib.parse import quote_plus
 
-from ..logging_config import get_logger
+import aiohttp
+
 from ..exceptions import CampaignGeneratorError
+from ..logging_config import get_logger
 
 logger = get_logger("web_search")
 
@@ -72,7 +72,7 @@ class WebSearchService:
                     logger.info(f"Search '{query}' returned {len(results)} results")
                     return results
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             logger.error(f"Search timeout for query: {query}")
             return []
         except Exception as e:

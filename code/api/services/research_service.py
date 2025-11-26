@@ -7,8 +7,8 @@ Processes and summarizes research content for campaigns.
 from datetime import datetime
 from typing import Any
 
-from ..models import ResearchSource, ResearchSummary, ResearchAddResponse
 from ..logging_config import get_logger
+from ..models import ResearchAddResponse, ResearchSource, ResearchSummary
 from .ai_client import get_ai_manager, get_prompt_loader
 from .file_operations import get_file_service
 from .template_renderer import get_template_renderer
@@ -112,7 +112,7 @@ class ResearchService:
             if self.research_repository:
                 try:
                     from ..database.models import ResearchItem
-                    
+
                     db_research = ResearchItem(
                         project_id=project_id,
                         category=source.category,

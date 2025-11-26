@@ -21,6 +21,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY api/ ./api/
 COPY config/ ./config/
 COPY tests/ ./tests/
+COPY alembic/ ./alembic/
+COPY alembic.ini .
 
 # Create data directory and non-root user
 RUN mkdir -p /data/projects && \

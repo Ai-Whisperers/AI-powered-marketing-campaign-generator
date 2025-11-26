@@ -1,14 +1,13 @@
 import asyncio
-import sys
 import os
-from pathlib import Path
+import sys
 
 # Add code directory to path
 sys.path.append(os.path.join(os.getcwd(), "code"))
 
 from api.config import get_settings
-from api.services.ideas_service import IdeasService
 from api.models import IdeaConcept
+from api.services.ideas_service import IdeasService
 
 
 async def test_config_security():

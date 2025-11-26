@@ -4,20 +4,13 @@ Synthesis Service
 Synthesizes research into actionable insights and quick references.
 """
 
-from typing import Any
 
-from ..models import (
-    QuickReference,
-    MarketSnapshot,
-    Target30Seconds,
-    KeyInsight,
-    SynthesizeResponse
-)
 from ..logging_config import get_logger
+from ..models import KeyInsight, MarketSnapshot, QuickReference, SynthesizeResponse, Target30Seconds
 from .ai_client import get_ai_manager, get_prompt_loader
 from .file_operations import get_file_service
-from .template_renderer import get_template_renderer
 from .research_service import get_research_service
+from .template_renderer import get_template_renderer
 
 logger = get_logger("synthesis_service")
 

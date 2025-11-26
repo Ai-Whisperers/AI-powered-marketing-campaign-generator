@@ -7,16 +7,15 @@ Automates the entire research pipeline for campaign generation.
 
 import asyncio
 from datetime import datetime
-from typing import Any
 from pathlib import Path
+from typing import Any
 
-from ..models import ResearchSource
 from ..logging_config import get_logger
-from ..exceptions import CampaignGeneratorError
-from .web_search import get_web_search_service, WebSearchService
-from .web_fetcher import get_web_fetcher, WebFetcherService
-from .research_service import get_research_service, ResearchService
+from ..models import ResearchSource
 from .ai_client import get_ai_manager, get_prompt_loader
+from .research_service import get_research_service
+from .web_fetcher import get_web_fetcher
+from .web_search import get_web_search_service
 
 logger = get_logger("research_automation")
 

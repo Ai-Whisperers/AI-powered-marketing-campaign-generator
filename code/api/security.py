@@ -7,7 +7,6 @@ Provides API key authentication, rate limiting, and input validation.
 import hashlib
 import time
 from collections import defaultdict
-from typing import Optional
 
 from fastapi import HTTPException, Request, Security
 from fastapi.security import APIKeyHeader
@@ -15,7 +14,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
 from .config import get_settings
-from .logging_config import get_logger, set_request_id, generate_request_id
+from .logging_config import generate_request_id, get_logger, set_request_id
 
 logger = get_logger("security")
 
@@ -56,7 +55,7 @@ async def verify_api_key(api_key: str = Security(API_KEY_HEADER)) -> str:
 
     # Constant-time comparison to prevent timing attacks
     if not _secure_compare(api_key, settings.api_key):
-        logger.warning(f"Invalid API key attempt")
+        logger.warning("Invalid API key attempt")
         raise HTTPException(
             status_code=403,
             detail="Invalid API key",
@@ -224,7 +223,7 @@ def validate_filename(filename: str) -> str:
     if any(char in filename for char in invalid_chars):
         raise HTTPException(
             status_code=400,
-            detail=f"Invalid filename: contains forbidden characters"
+            detail="Invalid filename: contains forbidden characters"
         )
 
     return filename

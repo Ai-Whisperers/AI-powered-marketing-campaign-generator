@@ -10,13 +10,17 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
 
-import httpx
-from anthropic import Anthropic, APIError, RateLimitError as AnthropicRateLimitError
-from openai import OpenAI, APIError as OpenAIAPIError, RateLimitError as OpenAIRateLimitError
 import google.generativeai as genai
+import httpx
+from anthropic import Anthropic, APIError
+from anthropic import RateLimitError as AnthropicRateLimitError
 from google.api_core import exceptions as google_exceptions
+from openai import APIError as OpenAIAPIError
+from openai import OpenAI
+from openai import RateLimitError as OpenAIRateLimitError
 
 from ..config import get_settings
+
 try:
     from langfuse.callback import CallbackHandler as LangfuseCallbackHandler
 except ImportError:
@@ -26,21 +30,23 @@ from ..exceptions import (
     AIRateLimitError,
     AIResponseError,
     AITimeoutError,
-    MissingAPIKeyError
 )
 from ..logging_config import get_logger
 
 logger = get_logger("ai_client")
 
+
 # Import cache lazily to avoid circular imports
 def _get_cache():
     from .cache import get_ai_cache
+
     return get_ai_cache()
 
 
 # =============================================================================
 # Base AI Client
 # =============================================================================
+
 
 class BaseAIClient(ABC):
     """Abstract base class for AI clients."""
@@ -52,7 +58,7 @@ class BaseAIClient(ABC):
         system: str | None = None,
         temperature: float = 0.7,
         max_tokens: int = 4096,
-        response_format: str = "text"
+        response_format: str = "text",
     ) -> str:
         """
         Generate a response from the AI model.
@@ -79,6 +85,7 @@ class BaseAIClient(ABC):
 # Anthropic Client
 # =============================================================================
 
+
 class AnthropicClient(BaseAIClient):
     """Anthropic Claude API client."""
 
@@ -93,7 +100,7 @@ class AnthropicClient(BaseAIClient):
         system: str | None = None,
         temperature: float = 0.7,
         max_tokens: int = 4096,
-        response_format: str = "text"
+        response_format: str = "text",
     ) -> str:
         """Generate response using Claude."""
         try:
@@ -105,7 +112,7 @@ class AnthropicClient(BaseAIClient):
                 "model": self.model,
                 "max_tokens": max_tokens,
                 "temperature": temperature,
-                "messages": messages
+                "messages": messages,
             }
 
             if system:
@@ -125,9 +132,7 @@ class AnthropicClient(BaseAIClient):
         except APIError as e:
             logger.error(f"Anthropic API error: {e}")
             raise AIProviderError(
-                message=str(e),
-                provider="anthropic",
-                error_code="ANTHROPIC_API_ERROR"
+                message=str(e), provider="anthropic", error_code="ANTHROPIC_API_ERROR"
             )
 
         except httpx.TimeoutException as e:
@@ -141,6 +146,7 @@ class AnthropicClient(BaseAIClient):
 # =============================================================================
 # OpenAI Client
 # =============================================================================
+
 
 class OpenAIClient(BaseAIClient):
     """OpenAI GPT API client."""
@@ -156,7 +162,7 @@ class OpenAIClient(BaseAIClient):
         system: str | None = None,
         temperature: float = 0.7,
         max_tokens: int = 4096,
-        response_format: str = "text"
+        response_format: str = "text",
     ) -> str:
         """Generate response using GPT."""
         try:
@@ -171,7 +177,7 @@ class OpenAIClient(BaseAIClient):
                 "model": self.model,
                 "messages": messages,
                 "temperature": temperature,
-                "max_tokens": max_tokens
+                "max_tokens": max_tokens,
             }
 
             if response_format == "json":
@@ -190,11 +196,7 @@ class OpenAIClient(BaseAIClient):
 
         except OpenAIAPIError as e:
             logger.error(f"OpenAI API error: {e}")
-            raise AIProviderError(
-                message=str(e),
-                provider="openai",
-                error_code="OPENAI_API_ERROR"
-            )
+            raise AIProviderError(message=str(e), provider="openai", error_code="OPENAI_API_ERROR")
 
         except httpx.TimeoutException as e:
             logger.error(f"OpenAI timeout: {e}")
@@ -207,6 +209,7 @@ class OpenAIClient(BaseAIClient):
 # =============================================================================
 # Gemini Client
 # =============================================================================
+
 
 class GeminiClient(BaseAIClient):
     """Google Gemini API client."""
@@ -223,7 +226,7 @@ class GeminiClient(BaseAIClient):
         system: str | None = None,
         temperature: float = 0.7,
         max_tokens: int = 4096,
-        response_format: str = "text"
+        response_format: str = "text",
     ) -> str:
         """Generate response using Gemini."""
         try:
@@ -232,26 +235,27 @@ class GeminiClient(BaseAIClient):
             generation_config = genai.types.GenerationConfig(
                 temperature=temperature,
                 max_output_tokens=max_tokens,
-                response_mime_type="application/json" if response_format == "json" else "text/plain"
+                response_mime_type=(
+                    "application/json" if response_format == "json" else "text/plain"
+                ),
             )
 
-            # Construct prompt with system instruction if possible, 
+            # Construct prompt with system instruction if possible,
             # or prepend to user prompt
             full_prompt = prompt
             if system:
-                # Gemini supports system instructions in newer models, 
+                # Gemini supports system instructions in newer models,
                 # but for broad compatibility we can also prepend.
                 # However, let's try to use the system_instruction if initializing model,
-                # but here we already initialized it. 
-                # We can pass system instruction to GenerativeModel constructor, 
+                # but here we already initialized it.
+                # We can pass system instruction to GenerativeModel constructor,
                 # but we are reusing the instance.
                 # For per-request system prompt, it's best to prepend or use chat history.
                 # Simple approach: Prepend system prompt
                 full_prompt = f"System: {system}\n\nUser: {prompt}"
 
             response = await self.model.generate_content_async(
-                full_prompt,
-                generation_config=generation_config
+                full_prompt, generation_config=generation_config
             )
 
             content = response.text
@@ -265,27 +269,136 @@ class GeminiClient(BaseAIClient):
 
         except google_exceptions.GoogleAPICallError as e:
             logger.error(f"Gemini API error: {e}")
-            raise AIProviderError(
-                message=str(e),
-                provider="gemini",
-                error_code="GEMINI_API_ERROR"
-            )
+            raise AIProviderError(message=str(e), provider="gemini", error_code="GEMINI_API_ERROR")
 
         except Exception as e:
             logger.error(f"Gemini unexpected error: {e}")
             raise AIProviderError(
-                message=str(e),
-                provider="gemini",
-                error_code="GEMINI_UNKNOWN_ERROR"
+                f"Gemini error: {e}", provider="gemini", error_code="GEMINI_ERROR"
             )
 
-    def get_provider_name(self) -> str:
+    def get_provider_name(self):
         return "gemini"
+
+
+# =============================================================================
+# Groq Client
+# =============================================================================
+
+
+class GroqClient(BaseAIClient):
+    """Groq API client (Llama models via cloud)."""
+
+    def __init__(self, api_key: str, model: str = "llama-3.1-8b-instant"):
+        from groq import AsyncGroq
+
+        self.client = AsyncGroq(api_key=api_key)
+        self.model = model
+
+    async def generate(
+        self,
+        prompt: str,
+        system: str | None = None,
+        temperature: float = 0.7,
+        max_tokens: int = 4096,
+        response_format: str = "text",
+    ):
+        """Generate response using Groq."""
+        try:
+            messages = []
+            if system:
+                messages.append({"role": "system", "content": system})
+            messages.append({"role": "user", "content": prompt})
+
+            response = await self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
+
+            return response.choices[0].message.content
+
+        except Exception as e:
+            error_msg = str(e)
+            logger.error(f"Groq API error: {error_msg}")
+
+            # Handle rate limits
+            if "rate" in error_msg.lower() or "429" in error_msg:
+                raise AIRateLimitError(f"Rate limit exceeded for groq: {error_msg}")
+
+            # Handle timeouts
+            if "timeout" in error_msg.lower():
+                raise AITimeoutError(f"Groq request timed out: {error_msg}")
+
+            # Generic error
+            raise AIProviderError(f"Groq API error: {error_msg}", provider="groq")
+
+    def get_provider_name(self):
+        return "groq"
+
+
+# =============================================================================
+# Ollama Client (Local LLM)
+# =============================================================================
+
+
+class OllamaClient(BaseAIClient):
+    """Ollama local LLM client."""
+
+    def __init__(self, model: str = "llama3.1:8b"):
+        import ollama
+
+        self.client = ollama
+        self.model = model
+
+    async def generate(
+        self,
+        prompt: str,
+        system: str | None = None,
+        temperature: float = 0.7,
+        max_tokens: int = 4096,
+        response_format: str = "text",
+    ):
+        """Generate response using Ollama (local)."""
+        try:
+            messages = []
+            if system:
+                messages.append({"role": "system", "content": system})
+            messages.append({"role": "user", "content": prompt})
+
+            response = self.client.chat(
+                model=self.model,
+                messages=messages,
+                options={
+                    "temperature": temperature,
+                    "num_predict": max_tokens,
+                },
+            )
+
+            return response["message"]["content"]
+
+        except Exception as e:
+            error_msg = str(e)
+            logger.error(f"Ollama error: {error_msg}")
+
+            # Handle connection errors (Ollama not running)
+            if "connection" in error_msg.lower() or "refused" in error_msg.lower():
+                raise AIProviderError(
+                    f"Ollama not running or not accessible: {error_msg}", provider="ollama"
+                )
+
+            # Generic error
+            raise AIProviderError(f"Ollama error: {error_msg}", provider="ollama")
+
+    def get_provider_name(self):
+        return "ollama"
 
 
 # =============================================================================
 # AI Client Manager
 # =============================================================================
+
 
 class AIClientManager:
     """
@@ -296,7 +409,9 @@ class AIClientManager:
 
     def __init__(self):
         self.settings = get_settings()
-        self.config = get_settings() # Alias for backward compatibility if needed, or just use settings
+        self.config = (
+            get_settings()
+        )  # Alias for backward compatibility if needed, or just use settings
         self.primary_client: BaseAIClient | None = None
         self.fallback_client: BaseAIClient | None = None
         self.langfuse_callback: CallbackHandler | None = None
@@ -304,42 +419,119 @@ class AIClientManager:
         self._initialize_langfuse()
 
     def _initialize_clients(self):
-        """Initialize primary and fallback clients."""
-        # Primary client (Anthropic)
-        if self.settings.anthropic_api_key:
-            self.primary_client = AnthropicClient(
-                api_key=self.settings.anthropic_api_key,
-                model=self.config.ai.anthropic.model if self.config.ai.anthropic else "claude-3-opus-20240229"
-            )
-        else:
-            logger.warning("Anthropic API key not configured")
+        """Initialize primary and fallback clients based on configuration."""
+        primary_provider = self.config.ai.primary
+        fallback_provider = self.config.ai.fallback
 
-        # Fallback client (OpenAI)
-        if self.settings.openai_api_key:
-            self.fallback_client = OpenAIClient(
-                api_key=self.settings.openai_api_key
-            )
-        else:
-            logger.warning("OpenAI API key not configured (fallback unavailable)")
+        logger.info(
+            f"Initializing AI clients: primary={primary_provider}, fallback={fallback_provider}"
+        )
 
-        # Gemini Client (Alternative Primary/Fallback)
-        if self.settings.gemini_api_key:
-             # If Gemini is set as primary in config, or if we want to use it
-             if self.config.ai.primary == "gemini":
-                 self.primary_client = GeminiClient(
-                     api_key=self.settings.gemini_api_key,
-                     model=self.config.ai.gemini.model if self.config.ai.gemini else "gemini-1.5-pro-latest"
-                 )
-             elif not self.fallback_client:
-                 self.fallback_client = GeminiClient(
-                     api_key=self.settings.gemini_api_key,
-                     model=self.config.ai.gemini.model if self.config.ai.gemini else "gemini-1.5-pro-latest"
-                 )
+        # Initialize primary client
+        if primary_provider == "ollama":
+            try:
+                self.primary_client = OllamaClient(
+                    model=self.config.ai.ollama.model if self.config.ai.ollama else "llama3.1:8b"
+                )
+                logger.info(f"✅ Initialized Ollama (local) as primary")
+            except Exception as e:
+                logger.warning(f"Failed to initialize Ollama: {e}. Will use fallback.")
+
+        elif primary_provider == "groq":
+            if self.settings.groq_api_key:
+                self.primary_client = GroqClient(
+                    api_key=self.settings.groq_api_key,
+                    model=(
+                        self.config.ai.groq.model if self.config.ai.groq else "llama-3.1-8b-instant"
+                    ),
+                )
+                logger.info(f"✅ Initialized Groq as primary")
+            else:
+                logger.warning("Groq API key not configured")
+
+        elif primary_provider == "anthropic":
+            if self.settings.anthropic_api_key:
+                self.primary_client = AnthropicClient(
+                    api_key=self.settings.anthropic_api_key,
+                    model=(
+                        self.config.ai.anthropic.model
+                        if self.config.ai.anthropic
+                        else "claude-3-opus-20240229"
+                    ),
+                )
+                logger.info(f"✅ Initialized Anthropic as primary")
+            else:
+                logger.warning("Anthropic API key not configured")
+
+        elif primary_provider == "openai":
+            if self.settings.openai_api_key:
+                self.primary_client = OpenAIClient(
+                    api_key=self.settings.openai_api_key,
+                    model=(
+                        self.config.ai.openai.model
+                        if self.config.ai.openai
+                        else "gpt-4-turbo-preview"
+                    ),
+                )
+                logger.info(f"✅ Initialized OpenAI as primary")
+            else:
+                logger.warning("OpenAI API key not configured")
+
+        elif primary_provider == "gemini":
+            if self.settings.gemini_api_key:
+                self.primary_client = GeminiClient(
+                    api_key=self.settings.gemini_api_key,
+                    model=(
+                        self.config.ai.gemini.model
+                        if self.config.ai.gemini
+                        else "gemini-1.5-pro-latest"
+                    ),
+                )
+                logger.info(f"✅ Initialized Gemini as primary")
+            else:
+                logger.warning("Gemini API key not configured")
+
+        # Initialize fallback client
+        if fallback_provider == "groq":
+            if self.settings.groq_api_key:
+                self.fallback_client = GroqClient(
+                    api_key=self.settings.groq_api_key,
+                    model=(
+                        self.config.ai.groq.model if self.config.ai.groq else "llama-3.1-8b-instant"
+                    ),
+                )
+                logger.info(f"✅ Initialized Groq as fallback")
+            else:
+                logger.warning("Groq API key not configured (fallback unavailable)")
+
+        elif fallback_provider == "openai":
+            if self.settings.openai_api_key:
+                self.fallback_client = OpenAIClient(
+                    api_key=self.settings.openai_api_key,
+                    model=self.config.ai.openai.model if self.config.ai.openai else "gpt-3.5-turbo",
+                )
+                logger.info(f"✅ Initialized OpenAI as fallback")
+            else:
+                logger.warning("OpenAI API key not configured (fallback unavailable)")
+
+        elif fallback_provider == "anthropic":
+            if self.settings.anthropic_api_key:
+                self.fallback_client = AnthropicClient(
+                    api_key=self.settings.anthropic_api_key,
+                    model=(
+                        self.config.ai.anthropic.model
+                        if self.config.ai.anthropic
+                        else "claude-3-opus-20240229"
+                    ),
+                )
+                logger.info(f"✅ Initialized Anthropic as fallback")
+            else:
+                logger.warning("Anthropic API key not configured (fallback unavailable)")
 
         if not self.primary_client and not self.fallback_client:
-            logger.warning("No AI clients initialized!")
+            logger.warning("⚠️ No AI clients initialized!")
 
-        # Always initialize mock client for fallback/emergency
+        # Always initialize mock client for emergency fallback
         self.mock_client = MockAIClient()
 
     def _initialize_langfuse(self):
@@ -352,12 +544,12 @@ class AIClientManager:
                 self.langfuse_callback = LangfuseCallbackHandler(
                     public_key=self.settings.langfuse_public_key,
                     secret_key=self.settings.langfuse_secret_key,
-                    host=self.settings.langfuse_host
+                    host=self.settings.langfuse_host,
                 )
                 logger.info("Langfuse integration enabled")
             except Exception as e:
                 logger.error(f"Failed to initialize Langfuse: {e}")
-        
+
         # Always initialize mock client for fallback/emergency
         self.mock_client = MockAIClient()
 
@@ -369,7 +561,7 @@ class AIClientManager:
         max_tokens: int | None = None,
         response_format: str = "text",
         use_fallback: bool = True,
-        use_cache: bool = True
+        use_cache: bool = True,
     ) -> str:
         """
         Generate AI response with automatic fallback and caching.
@@ -416,7 +608,7 @@ class AIClientManager:
                     system=system,
                     temperature=temperature,
                     max_tokens=max_tokens,
-                    response_format=response_format
+                    response_format=response_format,
                 )
             except (AIRateLimitError, AITimeoutError, AIProviderError) as e:
                 if use_fallback and self.fallback_client:
@@ -434,7 +626,7 @@ class AIClientManager:
                     system=system,
                     temperature=temperature,
                     max_tokens=max_tokens,
-                    response_format=response_format
+                    response_format=response_format,
                 )
             except (AIRateLimitError, AITimeoutError, AIProviderError) as e:
                 if self.mock_client:
@@ -449,7 +641,7 @@ class AIClientManager:
                 system=system,
                 temperature=temperature,
                 max_tokens=max_tokens,
-                response_format=response_format
+                response_format=response_format,
             )
 
         if response is None:
@@ -463,7 +655,7 @@ class AIClientManager:
                 system=system,
                 temperature=temperature,
                 max_tokens=max_tokens,
-                response_format=response_format
+                response_format=response_format,
             )
 
         # Cache the response
@@ -479,7 +671,7 @@ class AIClientManager:
         temperature: float | None = None,
         max_tokens: int | None = None,
         use_fallback: bool = True,
-        use_cache: bool = True
+        use_cache: bool = True,
     ) -> dict[str, Any]:
         """
         Generate AI response and parse as JSON.
@@ -491,7 +683,7 @@ class AIClientManager:
             max_tokens=max_tokens,
             response_format="json",
             use_fallback=use_fallback,
-            use_cache=use_cache
+            use_cache=use_cache,
         )
 
         try:
@@ -505,14 +697,47 @@ class AIClientManager:
             if content.endswith("```"):
                 content = content[:-3]
 
-            return json.loads(content.strip())
+            # Try direct parse first
+            try:
+                return json.loads(content.strip())
+            except json.JSONDecodeError:
+                # If direct parse fails, try to extract JSON using regex
+                logger.warning("Direct JSON parse failed, attempting regex extraction...")
+                import re
+
+                # Try to find JSON object (starts with {, ends with })
+                json_match = re.search(r"\{.*\}", content.strip(), re.DOTALL)
+                if json_match:
+                    try:
+                        extracted = json_match.group()
+                        parsed = json.loads(extracted)
+                        logger.info("Successfully extracted JSON object from response")
+                        return parsed
+                    except json.JSONDecodeError:
+                        pass
+
+                # Try to find JSON array (starts with [, ends with ])
+                array_match = re.search(r"\[.*\]", content.strip(), re.DOTALL)
+                if array_match:
+                    try:
+                        extracted = array_match.group()
+                        parsed = json.loads(extracted)
+                        logger.info("Successfully extracted JSON array from response")
+                        return parsed
+                    except json.JSONDecodeError:
+                        pass
+
+                # If all extraction attempts fail, re-raise original error
+                raise
 
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse JSON response: {e}")
             logger.debug(f"Response was: {response[:500]}")
             raise AIResponseError(
-                provider=self.primary_client.get_provider_name() if self.primary_client else "unknown",
-                reason=f"Invalid JSON: {e}"
+                provider=(
+                    self.primary_client.get_provider_name() if self.primary_client else "unknown"
+                ),
+                reason=f"Invalid JSON: {e}",
             )
 
 
@@ -525,137 +750,159 @@ class MockAIClient(BaseAIClient):
         system: str | None = None,
         temperature: float = 0.7,
         max_tokens: int = 4096,
-        response_format: str = "text"
+        response_format: str = "text",
     ) -> str:
         """Generate mock response."""
         logger.info("Generating MOCK response")
-        
+
         if response_format == "json":
             # Return dummy JSON based on prompt content keywords
             # Check for ideas/brainstorm FIRST as they might contain "summary" in context
             if "ideas" in prompt.lower() or "brainstorm" in (system or "").lower():
-                return json.dumps({
-                    "ideas": [
-                        {
-                            "title": "Ueno para Todos",
-                            "description": "A campaign focusing on accessibility for all Paraguayans.",
-                            "rationale": "Aligns with financial inclusion mission."
-                        },
-                        {
-                            "title": "El Futuro es Hoy",
-                            "description": "Showcasing the futuristic digital terminals.",
-                            "rationale": "Highlights technological leadership."
-                        },
-                        {
-                            "title": "Sin Fronteras",
-                            "description": "Using the app anywhere in the world.",
-                            "rationale": "Emphasizes digital freedom."
-                        }
-                    ]
-                })
+                return json.dumps(
+                    {
+                        "ideas": [
+                            {
+                                "title": "Ueno para Todos",
+                                "description": "A campaign focusing on accessibility for all Paraguayans.",
+                                "rationale": "Aligns with financial inclusion mission.",
+                            },
+                            {
+                                "title": "El Futuro es Hoy",
+                                "description": "Showcasing the futuristic digital terminals.",
+                                "rationale": "Highlights technological leadership.",
+                            },
+                            {
+                                "title": "Sin Fronteras",
+                                "description": "Using the app anywhere in the world.",
+                                "rationale": "Emphasizes digital freedom.",
+                            },
+                        ]
+                    }
+                )
             elif "expand" in prompt.lower() or "expand" in (system or "").lower():
-                return json.dumps({
-                    "concept": "Expanded concept details...",
-                    "insight": "Deep consumer insight...",
-                    "execution": {
-                        "headline": "The future is now",
-                        "visual": "Futuristic banking terminal",
-                        "copy": "Experience the revolution."
-                    },
-                    "scores": {
-                        "diferenciacion": 8,
-                        "relevancia_cultural": 9,
-                        "claridad_insight": 8,
-                        "ejecutabilidad": 9,
-                        "potencial_viral": 7,
-                        "memorabilidad": 8,
-                        "versatilidad": 9,
-                        "alineacion_marca": 10,
-                        "potencial_pr": 8,
-                        "escalabilidad": 9
-                    },
-                    "strengths": ["Strong brand alignment", "High feasibility"],
-                    "weaknesses": ["Requires budget"],
-                    "recommendation": "Proceed with pilot."
-                })
+                return json.dumps(
+                    {
+                        "concept": "Expanded concept details...",
+                        "insight": "Deep consumer insight...",
+                        "execution": {
+                            "headline": "The future is now",
+                            "visual": "Futuristic banking terminal",
+                            "copy": "Experience the revolution.",
+                        },
+                        "scores": {
+                            "diferenciacion": 8,
+                            "relevancia_cultural": 9,
+                            "claridad_insight": 8,
+                            "ejecutabilidad": 9,
+                            "potencial_viral": 7,
+                            "memorabilidad": 8,
+                            "versatilidad": 9,
+                            "alineacion_marca": 10,
+                            "potencial_pr": 8,
+                            "escalabilidad": 9,
+                        },
+                        "strengths": ["Strong brand alignment", "High feasibility"],
+                        "weaknesses": ["Requires budget"],
+                        "recommendation": "Proceed with pilot.",
+                    }
+                )
             elif "validate" in prompt.lower() or "validate" in (system or "").lower():
-                return json.dumps({
-                    "scores": {"clarity": 9, "feasibility": 8},
-                    "overall": 8.5,
-                    "strengths": ["Clear message", "Good fit"],
-                    "weaknesses": ["None"],
-                    "suggestions": ["Go for it"]
-                })
+                return json.dumps(
+                    {
+                        "scores": {"clarity": 9, "feasibility": 8},
+                        "overall": 8.5,
+                        "strengths": ["Clear message", "Good fit"],
+                        "weaknesses": ["None"],
+                        "suggestions": ["Go for it"],
+                    }
+                )
             elif "cultural" in prompt.lower() or "cultural" in (system or "").lower():
-                return json.dumps({
-                    "cultural_score": 9,
-                    "positives": ["Respects local customs"],
-                    "concerns": [],
-                    "suggestions": [],
-                    "approved": True
-                })
+                return json.dumps(
+                    {
+                        "cultural_score": 9,
+                        "positives": ["Respects local customs"],
+                        "concerns": [],
+                        "suggestions": [],
+                        "approved": True,
+                    }
+                )
             elif "statistics" in prompt.lower() or "statistics" in (system or "").lower():
-                return json.dumps({
-                    "statistics": [
-                        {"text": "Ueno Bank has 2 million users", "source": "Mock Data"},
-                        {"text": "50% market growth in 2024", "source": "Mock Data"},
-                        {"text": "#1 Digital Bank in Paraguay", "source": "Mock Data"}
-                    ]
-                })
+                return json.dumps(
+                    {
+                        "statistics": [
+                            {"text": "Ueno Bank has 2 million users", "source": "Mock Data"},
+                            {"text": "50% market growth in 2024", "source": "Mock Data"},
+                            {"text": "#1 Digital Bank in Paraguay", "source": "Mock Data"},
+                        ]
+                    }
+                )
             elif "summary" in prompt.lower() or "summarize" in (system or "").lower():
-                return json.dumps({
-                    "title": "Mock Research Summary",
-                    "summary": "This is a mock summary of the research content. Ueno Bank is a leading digital bank in Paraguay focused on financial inclusion and technology.",
-                    "key_points": ["Digital first approach", "Financial inclusion", "Rapid growth"],
-                    "statistics": [{"text": "2M users", "source": "Mock"}],
-                    "relevance_score": 9.0,
-                    "source_type": "news_article"
-                })
+                return json.dumps(
+                    {
+                        "title": "Mock Research Summary",
+                        "summary": "This is a mock summary of the research content. Ueno Bank is a leading digital bank in Paraguay focused on financial inclusion and technology.",
+                        "key_points": [
+                            "Digital first approach",
+                            "Financial inclusion",
+                            "Rapid growth",
+                        ],
+                        "statistics": [{"text": "2M users", "source": "Mock"}],
+                        "relevance_score": 9.0,
+                        "source_type": "news_article",
+                    }
+                )
             elif "refine" in prompt.lower() or "refine" in (system or "").lower():
-                return json.dumps({
-                    "ideas": [
-                        {
-                            "title": "Ueno para Todos (Refined)",
-                            "description": "A refined campaign focusing on accessibility for all Paraguayans, emphasizing zero fees and 24/7 access.",
-                            "rationale": "Stronger value proposition based on critique, highlighting inclusivity."
-                        },
-                        {
-                            "title": "El Futuro es Hoy (Refined)",
-                            "description": "Showcasing the futuristic digital terminals with real user testimonials to build trust.",
-                            "rationale": "Adds social proof to the tech angle to make it more relatable."
-                        },
-                        {
-                            "title": "Sin Fronteras (Refined)",
-                            "description": "Using the app anywhere in the world, highlighting travel benefits and global acceptance.",
-                            "rationale": "Expands on the freedom concept with concrete examples."
-                        }
-                    ]
-                })
+                return json.dumps(
+                    {
+                        "ideas": [
+                            {
+                                "title": "Ueno para Todos (Refined)",
+                                "description": "A refined campaign focusing on accessibility for all Paraguayans, emphasizing zero fees and 24/7 access.",
+                                "rationale": "Stronger value proposition based on critique, highlighting inclusivity.",
+                            },
+                            {
+                                "title": "El Futuro es Hoy (Refined)",
+                                "description": "Showcasing the futuristic digital terminals with real user testimonials to build trust.",
+                                "rationale": "Adds social proof to the tech angle to make it more relatable.",
+                            },
+                            {
+                                "title": "Sin Fronteras (Refined)",
+                                "description": "Using the app anywhere in the world, highlighting travel benefits and global acceptance.",
+                                "rationale": "Expands on the freedom concept with concrete examples.",
+                            },
+                        ]
+                    }
+                )
             elif "score" in prompt.lower() or "critique" in (system or "").lower():
                 # For scoring/critique
-                return json.dumps({
-                    "scores": {
-                        "Diferenciación": 8,
-                        "Autenticidad": 9,
-                        "Potencial Viral": 7,
-                        "Conexión Emocional": 8,
-                        "Ejecutabilidad": 9,
-                        "Esencia de Marca": 10,
-                        "Target Connection": 8,
-                        "Formato Digital": 9,
-                        "Memorable": 7,
-                        "Valor al Consumidor": 9
-                    },
-                    "critique": "Strong idea with good brand alignment."
-                })
+                return json.dumps(
+                    {
+                        "scores": {
+                            "Diferenciación": 8,
+                            "Autenticidad": 9,
+                            "Potencial Viral": 7,
+                            "Conexión Emocional": 8,
+                            "Ejecutabilidad": 9,
+                            "Esencia de Marca": 10,
+                            "Target Connection": 8,
+                            "Formato Digital": 9,
+                            "Memorable": 7,
+                            "Valor al Consumidor": 9,
+                        },
+                        "critique": "Strong idea with good brand alignment.",
+                    }
+                )
             elif "video" in prompt.lower():
-                 return json.dumps({
-                    "video_prompt": "Cinematic shot of a modern digital bank terminal in Asuncion, golden hour lighting, 4k.",
-                    "style": "Modern, Tech, Warm"
-                })
+                return json.dumps(
+                    {
+                        "video_prompt": "Cinematic shot of a modern digital bank terminal in Asuncion, golden hour lighting, 4k.",
+                        "style": "Modern, Tech, Warm",
+                    }
+                )
             else:
                 return json.dumps({"error": "Unknown mock request type"})
-        
+
         return "This is a mock text response from the AI."
 
     def get_provider_name(self) -> str:
@@ -666,7 +913,7 @@ class MockAIClient(BaseAIClient):
         prompt: str,
         system: str | None = None,
         temperature: float | None = None,
-        max_tokens: int | None = None
+        max_tokens: int | None = None,
     ) -> dict[str, Any]:
         """
         Generate AI response and parse as JSON.
@@ -685,7 +932,7 @@ class MockAIClient(BaseAIClient):
             system=system,
             temperature=temperature,
             max_tokens=max_tokens,
-            response_format="json"
+            response_format="json",
         )
 
         try:
@@ -705,14 +952,17 @@ class MockAIClient(BaseAIClient):
             logger.error(f"Failed to parse JSON response: {e}")
             logger.debug(f"Response was: {response[:500]}")
             raise AIResponseError(
-                provider=self.primary_client.get_provider_name() if self.primary_client else "unknown",
-                reason=f"Invalid JSON: {e}"
+                provider=(
+                    self.primary_client.get_provider_name() if self.primary_client else "unknown"
+                ),
+                reason=f"Invalid JSON: {e}",
             )
 
 
 # =============================================================================
 # Prompt Loader
 # =============================================================================
+
 
 class PromptLoader:
     """
@@ -749,12 +999,7 @@ class PromptLoader:
 
         return content
 
-    def format(
-        self,
-        category: str,
-        name: str,
-        **kwargs
-    ) -> tuple[str | None, str]:
+    def format(self, category: str, name: str, **kwargs) -> tuple[str | None, str]:
         """
         Load and format a prompt with variables.
 

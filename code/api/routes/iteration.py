@@ -7,8 +7,8 @@ API endpoints for iterative research and idea improvement loops.
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from ..services.iteration_service import get_iteration_service, IterationError
 from ..logging_config import get_logger
+from ..services.iteration_service import IterationError, get_iteration_service
 
 logger = get_logger("routes.iteration")
 router = APIRouter(prefix="/projects/{project_id}", tags=["iteration"])

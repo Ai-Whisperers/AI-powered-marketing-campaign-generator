@@ -7,13 +7,12 @@ Provides multiple methods to detect similar ideas:
 - TF-IDF based cosine similarity (optional, requires sklearn)
 """
 
-import re
-from typing import List, Dict, Tuple, Set
-from collections import Counter
 import math
+import re
+from collections import Counter
 
 
-def tokenize(text: str) -> List[str]:
+def tokenize(text: str) -> list[str]:
     """
     Tokenize text into words, removing stopwords and punctuation.
 
@@ -30,7 +29,7 @@ def tokenize(text: str) -> List[str]:
         'y', 'o', 'que', 'es', 'son', 'como', 'más', 'pero',
         'su', 'sus', 'se', 'le', 'les', 'lo', 'este', 'esta',
         'estos', 'estas', 'ese', 'esa', 'esos', 'esas',
-        'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at',
+        'the', 'an', 'and', 'or', 'but', 'in', 'on', 'at',
         'to', 'for', 'of', 'with', 'by', 'from', 'is', 'are'
     }
 
@@ -66,7 +65,7 @@ def get_idea_text(idea: dict) -> str:
     return ' '.join(str(f) for f in fields if f)
 
 
-def jaccard_similarity(tokens1: List[str], tokens2: List[str]) -> float:
+def jaccard_similarity(tokens1: list[str], tokens2: list[str]) -> float:
     """
     Calculate Jaccard similarity between two token lists.
 
@@ -89,7 +88,7 @@ def jaccard_similarity(tokens1: List[str], tokens2: List[str]) -> float:
     return intersection / union if union > 0 else 0.0
 
 
-def get_ngrams(tokens: List[str], n: int = 2) -> Set[tuple]:
+def get_ngrams(tokens: list[str], n: int = 2) -> set[tuple]:
     """
     Generate n-grams from token list.
 
@@ -106,7 +105,7 @@ def get_ngrams(tokens: List[str], n: int = 2) -> Set[tuple]:
     return set(tuple(tokens[i:i+n]) for i in range(len(tokens) - n + 1))
 
 
-def ngram_similarity(tokens1: List[str], tokens2: List[str], n: int = 2) -> float:
+def ngram_similarity(tokens1: list[str], tokens2: list[str], n: int = 2) -> float:
     """
     Calculate n-gram based similarity.
 
@@ -130,7 +129,7 @@ def ngram_similarity(tokens1: List[str], tokens2: List[str], n: int = 2) -> floa
     return intersection / union if union > 0 else 0.0
 
 
-def cosine_similarity_simple(tokens1: List[str], tokens2: List[str]) -> float:
+def cosine_similarity_simple(tokens1: list[str], tokens2: list[str]) -> float:
     """
     Calculate cosine similarity using term frequency.
 
@@ -164,10 +163,10 @@ def cosine_similarity_simple(tokens1: List[str], tokens2: List[str]) -> float:
 
 def check_idea_similarity(
     new_idea: dict,
-    existing_ideas: List[dict],
+    existing_ideas: list[dict],
     threshold: float = 0.4,
     method: str = "combined"
-) -> Tuple[bool, float, str]:
+) -> tuple[bool, float, str]:
     """
     Check if a new idea is too similar to existing ideas.
 
@@ -222,9 +221,9 @@ def check_idea_similarity(
 
 
 def find_duplicate_clusters(
-    ideas: List[dict],
+    ideas: list[dict],
     threshold: float = 0.5
-) -> List[List[int]]:
+) -> list[list[int]]:
     """
     Find clusters of similar ideas.
 

@@ -4,12 +4,13 @@ Analytics API Routes.
 Endpoints for generating analytics reports and insights.
 """
 
-from fastapi import APIRouter, Depends, HTTPException
-from typing import Dict, Any
+from typing import Any
 
-from ..dependencies import get_analytics_service, APIKeyDep
-from ..services.analytics_service import AnalyticsService
+from fastapi import APIRouter, Depends, HTTPException
+
+from ..dependencies import APIKeyDep, get_analytics_service
 from ..logging_config import get_logger
+from ..services.analytics_service import AnalyticsService
 
 logger = get_logger("routes.analytics")
 
@@ -21,7 +22,7 @@ async def generate_research_intelligence(
     project_id: str,
     analytics: AnalyticsService = Depends(get_analytics_service),
     _: APIKeyDep = None
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Generate Research Intelligence Report.
 
@@ -47,7 +48,7 @@ async def synthesize_strategic_insights(
     project_id: str,
     analytics: AnalyticsService = Depends(get_analytics_service),
     _: str = Depends(APIKeyDep)
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Generate Strategic Insights Synthesis.
 
@@ -73,7 +74,7 @@ async def map_insights_to_ideas(
     project_id: str,
     analytics: AnalyticsService = Depends(get_analytics_service),
     _: str = Depends(APIKeyDep)
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Create Insights-to-Ideas Mapping.
 
@@ -98,7 +99,7 @@ async def generate_all_analytics(
     project_id: str,
     analytics: AnalyticsService = Depends(get_analytics_service),
     _: str = Depends(APIKeyDep)
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Generate all Phase 1 analytics reports.
 
@@ -142,7 +143,7 @@ async def analyze_competitors(
     project_id: str,
     analytics: AnalyticsService = Depends(get_analytics_service),
     _: str = Depends(APIKeyDep)
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Generate Competitive Intelligence Dashboard.
 
@@ -168,7 +169,7 @@ async def identify_trends(
     project_id: str,
     analytics: AnalyticsService = Depends(get_analytics_service),
     _: str = Depends(APIKeyDep)
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Generate Trend Analysis Report.
 
@@ -194,7 +195,7 @@ async def assess_research_quality(
     project_id: str,
     analytics: AnalyticsService = Depends(get_analytics_service),
     _: str = Depends(APIKeyDep)
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Generate Research Quality Dashboard.
 
@@ -220,7 +221,7 @@ async def create_audience_personas(
     project_id: str,
     analytics: AnalyticsService = Depends(get_analytics_service),
     _: str = Depends(APIKeyDep)
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Generate Audience Deep Dive Report with detailed personas."""
     try:
         result = await analytics.create_audience_personas(project_id)
@@ -235,7 +236,7 @@ async def generate_content_strategy(
     project_id: str,
     analytics: AnalyticsService = Depends(get_analytics_service),
     _: str = Depends(APIKeyDep)
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Generate Content Strategy Framework."""
     try:
         result = await analytics.generate_content_strategy(project_id)
@@ -250,7 +251,7 @@ async def validate_cultural_sensitivity(
     project_id: str,
     analytics: AnalyticsService = Depends(get_analytics_service),
     _: str = Depends(APIKeyDep)
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Generate Cultural Sensitivity Analysis."""
     try:
         result = await analytics.validate_cultural_sensitivity(project_id)

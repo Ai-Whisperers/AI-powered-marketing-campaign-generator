@@ -2,13 +2,14 @@
 Project management routes.
 """
 
-from fastapi import APIRouter, HTTPException
 from uuid import uuid4
 
-from ..models import ProjectCreate, ProjectResponse, ProjectListResponse
-from ..dependencies import FileServiceDep, APIKeyDep
+from fastapi import APIRouter, HTTPException
+
+from ..dependencies import APIKeyDep, FileServiceDep
 from ..exceptions import ProjectExistsError, ProjectNotFoundError
 from ..logging_config import get_logger
+from ..models import ProjectCreate, ProjectListResponse, ProjectResponse
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 logger = get_logger("routes.projects")

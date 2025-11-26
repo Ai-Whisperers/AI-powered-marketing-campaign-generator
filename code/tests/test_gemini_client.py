@@ -1,7 +1,8 @@
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
-import sys
 import os
+import sys
+from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 # Add code directory to path
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
@@ -14,6 +15,7 @@ sys.modules["google.api_core.exceptions"] = MagicMock()
 
 from api.services.ai_client import GeminiClient
 
+
 @pytest.mark.asyncio
 async def test_gemini_client_initialization():
     """Test GeminiClient initialization."""
@@ -25,13 +27,13 @@ async def test_gemini_client_initialization():
 async def test_gemini_client_generate():
     """Test GeminiClient generation."""
     client = GeminiClient(api_key="test-key")
-    
+
     # Mock the model's generate_content_async method
     mock_response = MagicMock()
     mock_response.text = "Generated content"
     client.model.generate_content_async = AsyncMock(return_value=mock_response)
-    
+
     response = await client.generate("Test prompt")
-    
+
     assert response == "Generated content"
     client.model.generate_content_async.assert_called_once()

@@ -6,20 +6,20 @@ Refactored to use Instructor for robust Pydantic validation.
 """
 
 import instructor
-from openai import AsyncOpenAI
 from anthropic import AsyncAnthropic
+from openai import AsyncOpenAI
 
+from ..config import get_settings
+from ..logging_config import get_logger
 from ..models import (
     BriefAnalysis,
-    TargetAudience,
-    CreativeDirection,
+    BriefParseResponse,
     BriefRequirements,
-    BriefParseResponse
+    CreativeDirection,
+    TargetAudience,
 )
-from ..logging_config import get_logger
-from ..config import get_settings
-from .file_operations import get_file_service
 from .ai_client import get_prompt_loader
+from .file_operations import get_file_service
 
 logger = get_logger("brief_parser")
 settings = get_settings()
@@ -28,6 +28,7 @@ settings = get_settings()
 # Helper Models
 # =============================================================================
 from pydantic import BaseModel
+
 
 class DirectionsResponse(BaseModel):
     """Wrapper for list of creative directions."""
@@ -45,7 +46,7 @@ class BriefParserService:
     def __init__(self):
         self.prompts = get_prompt_loader()
         self.files = get_file_service()
-        
+
         # Initialize Instructor client
         if settings.anthropic_api_key:
             self.client = instructor.from_anthropic(
@@ -164,7 +165,7 @@ class BriefParserService:
             temperature=0.5, # Slightly creative
             max_tokens=4096
         )
-        
+
         return response.directions
 
     async def _extract_requirements(self, brief_content: str) -> BriefRequirements:

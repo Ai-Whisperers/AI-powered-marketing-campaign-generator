@@ -5,20 +5,16 @@ Uses Pydantic Settings for environment variable loading and validation,
 merging with YAML configuration for project-specific settings.
 """
 
-import os
-from pathlib import Path
 from functools import lru_cache
-from typing import Literal, Any, Dict, List
+from pathlib import Path
 
-import yaml
-from pydantic import Field, field_validator, BaseModel
+from pydantic import BaseModel, Field, field_validator
 from pydantic_settings import (
     BaseSettings,
-    SettingsConfigDict,
     PydanticBaseSettingsSource,
+    SettingsConfigDict,
     YamlConfigSettingsSource,
 )
-
 
 # =============================================================================
 # Nested Configuration Models
@@ -41,13 +37,13 @@ class ResearchCategory(BaseModel):
 
     id: str
     name: str
-    files: List[str]
+    files: list[str]
 
 
 class ResearchSettings(BaseModel):
     """Research configuration."""
 
-    categories: List[ResearchCategory] = []
+    categories: list[ResearchCategory] = []
 
 
 class ScoringCriterion(BaseModel):
@@ -70,7 +66,7 @@ class ScoringThresholds(BaseModel):
 class ScoringSettings(BaseModel):
     """Scoring configuration."""
 
-    criteria: List[ScoringCriterion] = []
+    criteria: list[ScoringCriterion] = []
     thresholds: ScoringThresholds = Field(default_factory=ScoringThresholds)
 
 
@@ -90,6 +86,7 @@ class AISettings(BaseModel):
     anthropic: AIProviderSettings | None = None
     openai: AIProviderSettings | None = None
     gemini: AIProviderSettings | None = None
+    groq: AIProviderSettings | None = None
 
 
 class ExportFormatSettings(BaseModel):
@@ -127,6 +124,7 @@ class Settings(BaseSettings):
     anthropic_api_key: str | None = Field(default=None, description="Anthropic Claude API key")
     openai_api_key: str = Field(default="", description="OpenAI API key (fallback)")
     gemini_api_key: str | None = Field(default=None, description="Google Gemini API key")
+    groq_api_key: str | None = Field(default=None, description="Groq API key")
     tavily_api_key: str | None = Field(default=None, description="Tavily API key")
 
     # Application (Env vars)
@@ -197,7 +195,7 @@ class Settings(BaseSettings):
     export: ExportSettings = Field(default_factory=ExportSettings)
 
     model_config = SettingsConfigDict(
-        env_file=Path(__file__).parent.parent / ".env",
+        env_file=Path(__file__).parent.parent.parent / ".env",
         env_file_encoding="utf-8",
         extra="ignore",
         yaml_file=Path(__file__).parent.parent / "config" / "default.yaml",
@@ -252,7 +250,7 @@ class Settings(BaseSettings):
         else:
             return "very_low"
 
-    def calculate_weighted_score(self, scores: Dict[str, float]) -> float:
+    def calculate_weighted_score(self, scores: dict[str, float]) -> float:
         """Calculate weighted average score."""
         total_weight = 0
         weighted_sum = 0
@@ -273,7 +271,7 @@ class Settings(BaseSettings):
 # =============================================================================
 
 
-@lru_cache()
+@lru_cache
 def get_settings() -> Settings:
     """
     Get cached application settings.

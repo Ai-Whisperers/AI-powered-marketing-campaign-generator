@@ -1,4 +1,5 @@
 import langfuse
+
 print(f"Langfuse version: {langfuse.version.__version__}")
 print(f"Dir langfuse: {dir(langfuse)}")
 try:

@@ -2,16 +2,10 @@
 Unit tests for security module.
 """
 
-import pytest
-from fastapi import HTTPException
-from unittest.mock import patch, MagicMock
 
-from api.security import (
-    validate_filename,
-    validate_project_id,
-    RateLimiter,
-    _secure_compare
-)
+import pytest
+from api.security import RateLimiter, _secure_compare, validate_filename, validate_project_id
+from fastapi import HTTPException
 
 
 class TestValidateFilename:

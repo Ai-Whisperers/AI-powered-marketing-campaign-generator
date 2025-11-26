@@ -5,7 +5,6 @@ This script properly configures the Python path and starts the FastAPI server.
 """
 
 import sys
-import os
 from pathlib import Path
 
 # Add the code directory to Python path
@@ -27,7 +26,7 @@ if __name__ == "__main__":
     print("Press CTRL+C to stop")
     print("=" * 80)
     print()
-    
+
     # Run the server
     uvicorn.run(
         "api.main:app",

@@ -6,14 +6,12 @@ similar ones to improve future idea generation.
 """
 
 import logging
-from pathlib import Path
-from typing import List, Dict, Optional
 from datetime import datetime
+from pathlib import Path
 
 from langchain_community.vectorstores import FAISS
-from langchain_openai import OpenAIEmbeddings
 from langchain_core.documents import Document
-import pickle
+from langchain_openai import OpenAIEmbeddings
 
 from ..config import get_settings
 
@@ -62,7 +60,7 @@ class CampaignMemory:
         title: str,
         concept: str,
         rationale: str,
-        execution: List[str],
+        execution: list[str],
         score: float,
         client: str = "",
         country: str = "",
@@ -130,9 +128,9 @@ Execution Plan:
         query: str,
         k: int = 5,
         min_score: float = 7.0,
-        country: Optional[str] = None,
-        industry: Optional[str] = None
-    ) -> List[Dict]:
+        country: str | None = None,
+        industry: str | None = None
+    ) -> list[dict]:
         """
         Find similar successful campaigns.
 
@@ -205,9 +203,9 @@ Execution Plan:
     async def get_best_campaigns(
         self,
         limit: int = 10,
-        country: Optional[str] = None,
-        industry: Optional[str] = None
-    ) -> List[Dict]:
+        country: str | None = None,
+        industry: str | None = None
+    ) -> list[dict]:
         """
         Get highest-scoring campaigns.
 
@@ -256,7 +254,7 @@ Execution Plan:
             logger.error(f"Error getting best campaigns: {e}", exc_info=True)
             return []
 
-    def get_stats(self) -> Dict:
+    def get_stats(self) -> dict:
         """Get statistics about stored campaigns."""
         try:
             if self.vectorstore is None:

@@ -1,8 +1,9 @@
 import asyncio
 import os
 import sys
-from dotenv import load_dotenv
+
 import aiohttp
+from dotenv import load_dotenv
 
 # Load environment variables
 dotenv_path = os.path.join(os.path.dirname(__file__), "..", "..", ".env")
@@ -12,12 +13,13 @@ load_dotenv(dotenv_path)
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 from api.config import get_settings
-from api.services.ai_client import OpenAIClient, AnthropicClient, GeminiClient
+from api.services.ai_client import AnthropicClient, GeminiClient, OpenAIClient
+
 
 async def verify_keys():
     print("Verifying API Keys and Connectivity...")
     settings = get_settings()
-    
+
     # 1. Verify OpenAI
     print("\n--- OpenAI Verification ---")
     if settings.openai_api_key:

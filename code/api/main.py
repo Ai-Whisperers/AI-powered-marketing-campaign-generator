@@ -6,23 +6,24 @@ Entry point for the MAGA (Marketing AI Generation Assistant) API.
 
 from contextlib import asynccontextmanager
 from datetime import datetime
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from .config import get_settings, get_project_config
+from .config import get_project_config, get_settings
 from .exceptions import CampaignGeneratorError
-from .logging_config import setup_logging, get_logger
+from .logging_config import get_logger, setup_logging
 from .routes import (
-    projects_router,
+    analytics_router,
     brief_router,
-    research_router,
-    ideas_router,
     export_router,
+    ideas_router,
     iteration_router,
-    analytics_router
+    projects_router,
+    research_router,
 )
-from .security import RateLimitMiddleware, SecurityHeadersMiddleware, RequestIDMiddleware
+from .security import RateLimitMiddleware, RequestIDMiddleware, SecurityHeadersMiddleware
 from .services.cache import get_ai_cache
 
 # Initialize logging
