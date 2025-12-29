@@ -39,6 +39,7 @@ class FileOperationsService:
         self.config = get_project_config()
         self.settings = get_settings()
         self.base_path = Path(self.settings.projects_dir)
+        self.projects_dir = self.base_path  # Alias for compatibility
 
         # Ensure projects directory exists
         self.base_path.mkdir(parents=True, exist_ok=True)
